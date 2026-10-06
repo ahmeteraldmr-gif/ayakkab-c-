@@ -1,0 +1,488 @@
+@extends('layouts.app')
+
+@section('title', $product->meta_title ?? ($product->name . ' | Yusuf Akboğa Ayakkabı'))
+@section('meta_description', $product->meta_description ?? $product->short_description)
+@section('og_image', $product->primary_image_url)
+@section('og_type', 'product')
+
+@section('content')
+
+    <!-- Breadcrumb -->
+    <div class="bg-dark text-white py-4 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex items-center space-x-2 text-xs text-white/50">
+                <a href="{{ route('home') }}" class="hover:text-accent transition-colors">Ana Sayfa</a>
+                <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                <a href="{{ route('products.index') }}" class="hover:text-accent transition-colors">Ürünler</a>
+                @if($product->category)
+                    <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                    <a href="{{ route('products.index', ['category' => $product->category->slug]) }}" class="hover:text-accent transition-colors">{{ $product->category->name }}</a>
+                @endif
+                <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                <span class="text-accent font-semibold truncate max-w-xs">{{ $product->name }}</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Product Detail -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <!-- LEFT: GALLERY & IMAGES (lg:col-span-7) -->
+            <div class="lg:col-span-7 space-y-4">
+                
+                <!-- Main Large Image with Zoom Feature -->
+                <div class="relative aspect-square w-full rounded-3xl bg-white border border-black/5 p-8 flex items-center justify-center overflow-hidden group shadow-sm">
+                    
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                        @if($product->is_new)
+                            <span class="bg-dark text-white text-xs font-extrabold uppercase px-3 py-1.5 rounded-lg tracking-wider">
+                                YENİ SEZON
+                            </span>
+                        @endif
+                        @if($product->has_discount)
+                            <span class="bg-rose-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-lg tracking-wider">
+                                -%{{ $product->discount_percent }} İNDİRİM
+                            </span>
+                        @endif
+                    </div>
+
+                    <!-- Favorite Button -->
+                    <button type="button" 
+                            data-fav-id="{{ $product->id }}"
+                            data-product="{{ json_encode([
+                                'id' => $product->id,
+                                'name' => $product->name,
+                                'price' => $product->formatted_effective_price,
+                                'image' => $product->primary_image_url,
+                                'brand' => $product->brand?->name ?? 'YSA',
+                                'url' => route('product.detail', $product->slug)
+                            ]) }}"
+                            onclick="toggleFavoriteFromButton(this)"
+                            class="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-cream hover:bg-white text-dark/70 hover:text-rose-500 shadow-md flex items-center justify-center transition-all"
+                            title="Favorilere Ekle">
+                        <i class="fa-regular fa-heart text-lg"></i>
+                    </button>
+
+                    <!-- Main Display Image with Zoom -->
+                    <div id="zoomContainer" class="w-full h-full flex items-center justify-center cursor-crosshair overflow-hidden">
+                        <img id="mainProductImage" 
+                             src="{{ $product->primary_image_url }}" 
+                             alt="{{ $product->name }}" 
+                             class="max-h-[480px] w-full object-contain filter drop-shadow-xl transition-transform duration-200">
+                    </div>
+                </div>
+
+                <!-- Thumbnail Switcher -->
+                @if($product->images->count() > 1)
+                    <div class="flex items-center space-x-3 overflow-x-auto pb-2">
+                        @foreach($product->images as $img)
+                            <button type="button" 
+                                    onclick="switchMainImage('{{ $img->url }}', this)" 
+                                    class="thumb-btn relative w-20 h-20 rounded-2xl bg-white border-2 {{ $loop->first ? 'border-accent' : 'border-transparent' }} p-2 flex items-center justify-center overflow-hidden hover:border-accent transition-all flex-shrink-0 shadow-sm">
+                                <img src="{{ $img->url }}" alt="{{ $product->name }}" class="w-full h-full object-contain">
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+
+                <!-- Product Trust & Highlight Badges -->
+                <div class="grid grid-cols-3 gap-3 pt-4">
+                    <div class="bg-white p-3.5 rounded-2xl border border-black/5 text-center flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-box-open text-accent text-lg mb-1"></i>
+                        <span class="text-[11px] font-bold text-dark">Orijinal Kutusunda</span>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-2xl border border-black/5 text-center flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-rotate-left text-accent text-lg mb-1"></i>
+                        <span class="text-[11px] font-bold text-dark">14 Gün Kolay Değişim</span>
+                    </div>
+                    <div class="bg-white p-3.5 rounded-2xl border border-black/5 text-center flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-truck-fast text-accent text-lg mb-1"></i>
+                        <span class="text-[11px] font-bold text-dark">Hızlı Kargo</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: PRODUCT BUYING INFO (lg:col-span-5) -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border border-black/5 shadow-sm space-y-6">
+                    
+                    <!-- Brand & SKU -->
+                    <div class="flex items-center justify-between border-b border-black/5 pb-3">
+                        <span class="font-display font-extrabold text-sm text-accent uppercase tracking-widest">
+                            {{ $product->brand?->name ?? 'Yusuf Akboğa Signature' }}
+                        </span>
+                        <span class="text-xs font-mono text-black/40">
+                            Kod: {{ $product->sku }}
+                        </span>
+                    </div>
+
+                    <!-- Title & Color -->
+                    <div>
+                        <h1 class="font-display font-extrabold text-2xl sm:text-3xl text-dark leading-tight">
+                            {{ $product->name }}
+                        </h1>
+                        @if($product->color)
+                            <div class="flex items-center space-x-2 mt-2 text-xs text-black/60 font-semibold">
+                                <span>Renk:</span>
+                                @if($product->color_code)
+                                    <span class="w-3.5 h-3.5 rounded-full border border-black/10 inline-block" style="background-color: {{ $product->color_code }}"></span>
+                                @endif
+                                <span class="text-dark">{{ $product->color }}</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Price Block -->
+                    <div class="bg-[#F7F7F5] rounded-2xl p-4 flex items-center justify-between">
+                        <div>
+                            @if($product->has_discount)
+                                <span class="text-xs text-black/40 line-through font-semibold block mb-0.5">
+                                    {{ $product->formatted_price }}
+                                </span>
+                                <div class="flex items-baseline space-x-2">
+                                    <span class="font-display font-extrabold text-2xl sm:text-3xl text-rose-600">
+                                        {{ $product->formatted_effective_price }}
+                                    </span>
+                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                        Kazancınız: {{ number_format($product->price - $product->discount_price, 2, ',', '.') }} TL
+                                    </span>
+                                </div>
+                            @else
+                                <span class="font-display font-extrabold text-2xl sm:text-3xl text-dark">
+                                    {{ $product->formatted_price }}
+                                </span>
+                            @endif
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[11px] text-emerald-600 font-bold block">
+                                <i class="fa-solid fa-circle-check"></i> Stokta Mevcut
+                            </span>
+                            <span class="text-[10px] text-black/40">KDV Dahil Fiyattır</span>
+                        </div>
+                    </div>
+
+                    <!-- Size Selection (NUMARA SEÇİMİ) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-dark flex items-center">
+                                <i class="fa-solid fa-shoe-prints text-accent mr-1.5"></i> Ayakkabı Numarası Seçiniz:
+                            </span>
+                            <button type="button" onclick="openSizeGuideModal()" class="text-xs font-bold text-accent hover:underline flex items-center">
+                                <i class="fa-solid fa-ruler mr-1"></i> Beden Tablosu
+                            </button>
+                        </div>
+
+                        <!-- Size Buttons Grid -->
+                        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2" id="sizeSelectorGroup">
+                            @foreach($sizesWithStock as $sItem)
+                                @if($sItem['in_stock'])
+                                    <button type="button" 
+                                            onclick="selectSize({{ $sItem['size_id'] }}, '{{ $sItem['size_number'] }}', {{ $sItem['stock'] }}, this)" 
+                                            class="size-btn relative py-3 rounded-xl border-2 border-black/10 hover:border-dark text-dark font-display font-bold text-sm transition-all flex flex-col items-center justify-center">
+                                        <span>{{ $sItem['size_number'] }}</span>
+                                        @if($sItem['is_low_stock'])
+                                            <span class="text-[9px] text-rose-600 font-semibold mt-0.5">Son {{ $sItem['stock'] }}</span>
+                                        @endif
+                                    </button>
+                                @else
+                                    <button type="button" 
+                                            disabled 
+                                            class="py-3 rounded-xl border border-black/5 bg-[#F0F0EE] text-black/30 font-display font-bold text-sm line-through cursor-not-allowed flex flex-col items-center justify-center"
+                                            title="Tükendi">
+                                        <span>{{ $sItem['size_number'] }}</span>
+                                        <span class="text-[9px] text-black/30 mt-0.5 font-normal">Tükendi</span>
+                                    </button>
+                                @endif
+                            @endforeach
+                        </div>
+                        
+                        <!-- Selected Size Alert / Validation Feedback -->
+                        <div id="sizeAlertText" class="mt-2 text-xs font-semibold text-rose-600 hidden">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i> Lütfen devam etmek için bir numara seçiniz.
+                        </div>
+                    </div>
+
+                    <!-- Quantity & Add to Cart -->
+                    <form id="addToCartForm" method="POST" action="{{ route('cart.add') }}" onsubmit="handleAddToCart(event)">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="size_id" id="selectedSizeId" value="">
+
+                        <div class="flex items-center space-x-3 pt-2">
+                            <!-- Quantity Selector -->
+                            <div class="flex items-center border border-black/10 rounded-2xl bg-[#F7F7F5] p-1 h-14">
+                                <button type="button" onclick="adjustQty(-1)" class="w-10 h-full rounded-xl hover:bg-white text-dark font-bold text-sm transition-colors flex items-center justify-center">
+                                    <i class="fa-solid fa-minus text-xs"></i>
+                                </button>
+                                <input type="number" name="quantity" id="productQty" value="1" min="1" max="10" readonly class="w-10 text-center bg-transparent font-bold text-sm text-dark focus:outline-none">
+                                <button type="button" onclick="adjustQty(1)" class="w-10 h-full rounded-xl hover:bg-white text-dark font-bold text-sm transition-colors flex items-center justify-center">
+                                    <i class="fa-solid fa-plus text-xs"></i>
+                                </button>
+                            </div>
+
+                            <!-- Add to Cart CTA Button -->
+                            <button type="submit" 
+                                    id="addToCartBtn"
+                                    class="flex-grow h-14 bg-dark hover:bg-accent text-white hover:text-dark font-display font-bold text-sm uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-black/10 flex items-center justify-center space-x-2.5">
+                                <i class="fa-solid fa-bag-shopping text-base"></i>
+                                <span>Sepete Ekle</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- WhatsApp Inquiry Button -->
+                    <div>
+                        <a href="{{ $whatsappLink }}" target="_blank" class="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors flex items-center justify-center space-x-2 shadow-md">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            <span>WhatsApp ile Bilgi Al & Sipariş Ver</span>
+                        </a>
+                    </div>
+
+                    <!-- Short Description -->
+                    @if($product->short_description)
+                        <div class="text-xs text-black/70 leading-relaxed pt-2 border-t border-black/5">
+                            {{ $product->short_description }}
+                        </div>
+                    @endif
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- PRODUCT DESCRIPTION TABS & DETAILS -->
+        <div class="mt-16 bg-white rounded-3xl p-8 border border-black/5 shadow-sm space-y-6">
+            <h3 class="font-display font-extrabold text-xl text-dark border-b border-black/5 pb-4 flex items-center">
+                <i class="fa-solid fa-circle-info text-accent mr-2.5"></i> Ürün Detayları ve Özellikleri
+            </h3>
+            
+            <div class="prose max-w-none text-black/70 text-sm leading-relaxed">
+                {!! nl2br(e($product->description ?? $product->short_description ?? 'Bu ürün için detaylı açıklama yakında eklenecektir.')) !!}
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-black/5 text-xs">
+                <div class="p-3.5 bg-[#F7F7F5] rounded-xl">
+                    <span class="text-black/40 block font-medium">Kategori:</span>
+                    <strong class="text-dark">{{ $product->category?->name ?? 'Sneaker' }}</strong>
+                </div>
+                <div class="p-3.5 bg-[#F7F7F5] rounded-xl">
+                    <span class="text-black/40 block font-medium">Marka:</span>
+                    <strong class="text-dark">{{ $product->brand?->name ?? 'YSA' }}</strong>
+                </div>
+                <div class="p-3.5 bg-[#F7F7F5] rounded-xl">
+                    <span class="text-black/40 block font-medium">Cinsiyet:</span>
+                    <strong class="text-dark capitalize">{{ $product->gender }}</strong>
+                </div>
+                <div class="p-3.5 bg-[#F7F7F5] rounded-xl">
+                    <span class="text-black/40 block font-medium">Orijinallik:</span>
+                    <strong class="text-emerald-700 font-bold">%100 Orijinal</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- RELATED PRODUCTS (BENZER ÜRÜNLER) -->
+        @if($relatedProducts->count() > 0)
+            <div class="mt-20">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-accent">İlginizi Çekebilir</span>
+                        <h2 class="font-display font-extrabold text-2xl text-dark mt-1">Benzer Modeller</h2>
+                    </div>
+                    <a href="{{ route('products.index', ['category' => $product->category?->slug]) }}" class="text-xs font-bold text-dark hover:text-accent flex items-center">
+                        Daha Fazla Gör <i class="fa-solid fa-arrow-right ml-1.5 text-accent"></i>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                    @foreach($relatedProducts as $relProd)
+                        @include('partials.product-card', ['product' => $relProd])
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+    </div>
+
+    <!-- SIZE GUIDE MODAL (DOĞRU NUMARA SEÇİMİ) -->
+    <div id="sizeGuideModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-black/5 pb-4 mb-6">
+                <div>
+                    <h3 class="font-display font-extrabold text-xl text-dark">Ayakkabı Numarası Rehberi</h3>
+                    <p class="text-black/50 text-xs mt-0.5">Doğru kalıbı ve ayağınıza en uygun numarayı bulun</p>
+                </div>
+                <button onclick="closeSizeGuideModal()" class="text-black/40 hover:text-dark text-2xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6 text-xs text-black/70">
+                <!-- Measurement instructions -->
+                <div class="bg-[#F7F7F5] p-5 rounded-2xl border border-black/5 space-y-2">
+                    <h4 class="font-display font-bold text-sm text-dark flex items-center">
+                        <i class="fa-solid fa-ruler-horizontal text-accent mr-2"></i> Ayak Ölçüsü Nasıl Alınır?
+                    </h4>
+                    <p>1. Bir kağıdı düz bir zemine koyup ayağınızı üzerine basın.</p>
+                    <p>2. Topuğunuzun en arka noktasını ve en uzun parmağınızın ucunu kalemle işaretleyin.</p>
+                    <p>3. İki nokta arasındaki mesafeyi santimetre (cm) cinsinden ölçüp aşağıdaki tablodan numaranızı belirleyin.</p>
+                </div>
+
+                <!-- Conversion Table -->
+                <div class="overflow-x-auto border border-black/10 rounded-2xl">
+                    <table class="w-full text-center divide-y divide-black/10">
+                        <thead class="bg-dark text-white font-bold text-[11px]">
+                            <tr>
+                                <th class="p-3">EU Numara</th>
+                                <th class="p-3">Ayak Uzunluğu (cm)</th>
+                                <th class="p-3">US Erkek</th>
+                                <th class="p-3">US Kadın</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-black/5 font-semibold text-dark">
+                            <tr><td class="p-2.5 bg-gray-50">36</td><td>22.5 cm</td><td>4.0</td><td>5.5</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">37</td><td>23.5 cm</td><td>5.0</td><td>6.5</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">38</td><td>24.0 cm</td><td>5.5</td><td>7.0</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">39</td><td>24.5 cm</td><td>6.5</td><td>8.0</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">40</td><td>25.0 cm</td><td>7.0</td><td>8.5</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">41</td><td>26.0 cm</td><td>8.0</td><td>9.5</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">42</td><td>26.5 cm</td><td>8.5</td><td>10.0</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">43</td><td>27.5 cm</td><td>9.5</td><td>11.0</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">44</td><td>28.0 cm</td><td>10.0</td><td>11.5</td></tr>
+                            <tr><td class="p-2.5 bg-gray-50">45</td><td>29.0 cm</td><td>11.0</td><td>12.5</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center pt-2">
+                    <button onclick="closeSizeGuideModal()" class="px-8 py-3 bg-dark text-white font-bold text-xs rounded-xl hover:bg-accent hover:text-dark transition-colors">
+                        Anladım, Numarayı Seç
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endsection
+
+@push('scripts')
+<script>
+    let selectedSize = null;
+
+    function switchMainImage(src, btn) {
+        document.getElementById('mainProductImage').src = src;
+        document.querySelectorAll('.thumb-btn').forEach(b => {
+            b.classList.remove('border-accent');
+            b.classList.add('border-transparent');
+        });
+        btn.classList.remove('border-transparent');
+        btn.classList.add('border-accent');
+    }
+
+    function selectSize(sizeId, sizeNum, stock, btn) {
+        selectedSize = sizeId;
+        document.getElementById('selectedSizeId').value = sizeId;
+        document.getElementById('sizeAlertText').classList.add('hidden');
+
+        // Style selected button
+        document.querySelectorAll('.size-btn').forEach(b => {
+            b.classList.remove('bg-dark', 'text-white', 'border-dark');
+            b.classList.add('border-black/10', 'text-dark');
+        });
+
+        btn.classList.remove('border-black/10', 'text-dark');
+        btn.classList.add('bg-dark', 'text-white', 'border-dark');
+    }
+
+    function adjustQty(amount) {
+        const input = document.getElementById('productQty');
+        let current = parseInt(input.value) || 1;
+        current = Math.max(1, Math.min(10, current + amount));
+        input.value = current;
+    }
+
+    function handleAddToCart(e) {
+        e.preventDefault();
+
+        if (!selectedSize) {
+            document.getElementById('sizeAlertText').classList.remove('hidden');
+            showToast('Lütfen sepetinize eklemek istediğiniz numarayı seçiniz.', 'error');
+            return;
+        }
+
+        const form = document.getElementById('addToCartForm');
+        const formData = new FormData(form);
+        const submitBtn = document.getElementById('addToCartBtn');
+        const originalContent = submitBtn.innerHTML;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Ekleniyor...</span>';
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
+
+            if (data.success) {
+                showToast(data.message, 'success');
+                // Update header cart count
+                const countBadge = document.getElementById('headerCartCount');
+                if (countBadge) countBadge.innerText = data.cart_count;
+            } else {
+                showToast(data.message || 'Ürün eklenemedi.', 'error');
+            }
+        })
+        .catch(err => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
+            showToast('İşlem sırasında bir hata oluştu.', 'error');
+        });
+    }
+
+    // Modal Handlers
+    function openSizeGuideModal() {
+        const modal = document.getElementById('sizeGuideModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeSizeGuideModal() {
+        const modal = document.getElementById('sizeGuideModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.getElementById('sizeGuideModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeSizeGuideModal();
+    });
+
+    // Image Zoom Effect on Hover
+    const zoomContainer = document.getElementById('zoomContainer');
+    const mainImg = document.getElementById('mainProductImage');
+    if (zoomContainer && mainImg) {
+        zoomContainer.addEventListener('mousemove', (e) => {
+            const rect = zoomContainer.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            mainImg.style.transformOrigin = `${x}% ${y}%`;
+            mainImg.style.transform = 'scale(1.4)';
+        });
+        zoomContainer.addEventListener('mouseleave', () => {
+            mainImg.style.transformOrigin = 'center center';
+            mainImg.style.transform = 'scale(1)';
+        });
+    }
+</script>
+@endpush
