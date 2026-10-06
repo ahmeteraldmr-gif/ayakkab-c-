@@ -69,6 +69,12 @@
                             <span>Ara Toplam:</span>
                             <strong class="text-[#111827]">{{ number_format($order->subtotal, 2, ',', '.') }} ₺</strong>
                         </div>
+                        @if($order->discount_amount > 0)
+                            <div class="flex justify-between text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                                <span>Kupon İndirimi {{ $order->coupon_code ? '(' . $order->coupon_code . ')' : '' }}:</span>
+                                <strong class="font-bold">-{{ number_format($order->discount_amount, 2, ',', '.') }} ₺</strong>
+                            </div>
+                        @endif
                         <div class="flex justify-between">
                             <span>Kargo Ücreti:</span>
                             <strong class="text-[#111827]">{{ $order->shipping_cost == 0 ? 'Ücretsiz' : number_format($order->shipping_cost, 2, ',', '.') . ' ₺' }}</strong>
@@ -120,24 +126,20 @@
             <!-- RIGHT: ORDER STATUS & UPDATE FORM (lg:col-span-4) -->
             <div class="lg:col-span-4 space-y-6">
                 
-                <!-- Status Updater -->
+                <!-- Status & Shipping Updater -->
                 <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-xs space-y-5 sticky top-24">
-                    <h3 class="font-sans font-bold text-sm text-[#111827] border-b border-[#E5E7EB] pb-3">
-                        Sipariş Durumu Güncelle
-                    </h3>
-
-                    <div class="text-xs">
-                        <span class="text-gray-500 block mb-1">Mevcut Durum:</span>
-                        <span class="px-3 py-1.5 rounded-lg font-bold inline-block text-xs {{ $order->status_badge_class }}">
+                    <h3 class="font-sans font-bold text-sm text-[#111827] border-b border-[#E5E7EB] pb-3 flex items-center justify-between">
+                        <span>Sipariş & Kargo Yönetimi</span>
+                        <span class="px-2.5 py-1 rounded-lg font-bold text-[11px] {{ $order->status_badge_class }}">
                             {{ $order->status_label }}
                         </span>
-                    </div>
+                    </h3>
 
                     <form method="POST" action="{{ route('admin.orders.update-status', $order->id) }}" class="space-y-4">
                         @csrf
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Durum Değiştir</label>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Sipariş Durumu</label>
                             <select name="status" class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3 py-2 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
                                 <option value="yeni" {{ $order->status === 'yeni' ? 'selected' : '' }}>Yeni Sipariş</option>
                                 <option value="hazirlaniyor" {{ $order->status === 'hazirlaniyor' ? 'selected' : '' }}>Hazırlanıyor</option>
@@ -148,18 +150,60 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Ödeme Durumu</label>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Ödeme Durumu</label>
                             <input type="text" name="payment_status" value="{{ old('payment_status', $order->payment_status) }}" 
                                    class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
                         </div>
 
+                        <div class="pt-3 border-t border-[#E5E7EB] space-y-3">
+                            <h4 class="font-bold text-xs text-gray-900 flex items-center">
+                                <i class="fa-solid fa-truck text-blue-600 mr-2"></i> Kargo & Gönderi Bilgileri
+                            </h4>
+
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Kargo Firması</label>
+                                <select name="shipping_company" class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3 py-2 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
+                                    <option value="">Firma Seçiniz</option>
+                                    @foreach(['Yurtiçi Kargo', 'Aras Kargo', 'MNG Kargo', 'PTT Kargo', 'Sürat Kargo', 'Hepsijet', 'Trendyol Express'] as $cargo)
+                                        <option value="{{ $cargo }}" {{ old('shipping_company', $order->shipping_company) === $cargo ? 'selected' : '' }}>{{ $cargo }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Kargo Takip Numarası</label>
+                                <input type="text" name="tracking_number" value="{{ old('tracking_number', $order->tracking_number) }}" placeholder="Örn: 123456789012" 
+                                       class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3.5 py-2 text-xs text-[#111827] font-mono focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Özel Takip Linki (Opsiyonel)</label>
+                                <input type="url" name="tracking_url" value="{{ old('tracking_url', $order->tracking_url) }}" placeholder="https://..." 
+                                       class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3.5 py-2 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
+                            </div>
+
+                            @if($order->effective_tracking_url)
+                                <div class="pt-2">
+                                    <a href="{{ $order->effective_tracking_url }}" target="_blank" class="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg flex items-center justify-center transition-colors border border-blue-200">
+                                        <i class="fa-solid fa-arrow-up-right-from-square mr-1.5 text-[11px]"></i> Kargo Takip Sayfasını Aç
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+
                         <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-colors shadow-xs">
-                            Durumu Güncelle
+                            Bilgileri Kaydet & Güncelle
                         </button>
                     </form>
 
                     <div class="pt-4 border-t border-[#E5E7EB] text-xs text-gray-400 space-y-1">
                         <p>Oluşturulma: {{ $order->created_at->format('d.m.Y H:i') }}</p>
+                        @if($order->shipped_at)
+                            <p class="text-blue-600 font-medium">Kargoya Verilme: {{ $order->shipped_at->format('d.m.Y H:i') }}</p>
+                        @endif
+                        @if($order->delivered_at)
+                            <p class="text-emerald-600 font-medium">Teslim Edilme: {{ $order->delivered_at->format('d.m.Y H:i') }}</p>
+                        @endif
                         <p>Son Güncelleme: {{ $order->updated_at->format('d.m.Y H:i') }}</p>
                     </div>
                 </div>

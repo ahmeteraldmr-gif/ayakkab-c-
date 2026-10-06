@@ -140,6 +140,15 @@
                                 <strong class="text-dark font-bold text-sm">{{ $cartSummary['subtotal_formatted'] }}</strong>
                             </div>
 
+                            @if(!empty($cartSummary['discount_amount']) && $cartSummary['discount_amount'] > 0)
+                                <div class="flex items-center justify-between text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-100">
+                                    <span class="flex items-center font-medium">
+                                        <i class="fa-solid fa-tag mr-1.5 text-emerald-600"></i> Kupon İndirimi ({{ $cartSummary['coupon_code'] }}):
+                                    </span>
+                                    <strong class="font-bold text-sm">-{{ $cartSummary['discount_formatted'] }}</strong>
+                                </div>
+                            @endif
+
                             <div class="flex items-center justify-between text-black/70">
                                 <span>Kargo Ücreti:</span>
                                 <strong class="{{ $cartSummary['shipping'] == 0 ? 'text-emerald-600 font-bold' : 'text-dark' }} text-sm">
@@ -153,6 +162,38 @@
                                     {{ $cartSummary['total_formatted'] }}
                                 </span>
                             </div>
+                        </div>
+
+                        <!-- Coupon Form -->
+                        <div class="border-t border-black/5 pt-4">
+                            @if(!empty($cartSummary['has_coupon']) && $cartSummary['has_coupon'])
+                                <div class="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                        <div>
+                                            <div class="text-xs font-bold text-emerald-900">{{ $cartSummary['coupon_code'] }}</div>
+                                            <div class="text-[10px] text-emerald-700">{{ $cartSummary['discount_formatted'] }} indirim uygulandı</div>
+                                        </div>
+                                    </div>
+                                    <form method="POST" action="{{ route('coupon.remove') }}">
+                                        @csrf
+                                        <button type="submit" class="text-xs text-rose-600 hover:text-rose-800 font-bold hover:underline">
+                                            Kaldır
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <form method="POST" action="{{ route('coupon.apply') }}" class="space-y-2">
+                                    @csrf
+                                    <label for="coupon_code" class="block text-xs font-bold text-dark">İndirim Kuponu</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="text" name="code" id="coupon_code" placeholder="Kupon Kodunuz" required class="flex-grow px-3.5 py-2.5 bg-[#F7F7F5] border border-black/10 rounded-xl text-xs uppercase tracking-wider font-semibold focus:outline-none focus:border-accent">
+                                        <button type="submit" class="px-4 py-2.5 bg-dark hover:bg-accent text-white hover:text-dark text-xs font-bold rounded-xl transition-colors whitespace-nowrap">
+                                            Uygula
+                                        </button>
+                                    </div>
+                                </form>
+                            @endif
                         </div>
 
                         <!-- Checkout CTA -->

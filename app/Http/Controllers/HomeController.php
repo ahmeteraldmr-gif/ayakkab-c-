@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Campaign;
 use App\Models\Category;
+use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\Setting;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -35,24 +35,57 @@ class HomeController extends Controller
                               ->take(8)
                               ->get();
 
-        // Best Sellers / Featured (Çok Satanlar & Öne Çıkanlar)
-        $bestSellers = Product::with(['brand', 'images', 'sizes', 'sizeStocks'])
-                              ->where('is_active', true)
-                              ->where(function ($q) {
-                                  $q->where('is_featured', true)
-                                    ->orWhere('view_count', '>', 5);
-                              })
-                              ->orderByDesc('view_count')
-                              ->take(8)
-                              ->get();
+        // Real Best Sellers Calculation based on actual Order Items (excluding cancelled orders)
+        $topSoldProductIds = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+                                      ->where('orders.status', '!=', 'iptal')
+                                      ->whereNotNull('order_items.product_id')
+                                      ->select('order_items.product_id', DB::raw('SUM(order_items.quantity) as total_sold'))
+                                      ->groupBy('order_items.product_id')
+                                      ->orderByDesc('total_sold')
+                                      ->take(8)
+                                      ->pluck('product_id')
+                                      ->toArray();
 
-        // If best sellers count is less than 4, fallback to latest products
+        $bestSellers = collect();
+        if (!empty($topSoldProductIds)) {
+            $fetched = Product::with(['brand', 'images', 'sizes', 'sizeStocks'])
+                              ->where('is_active', true)
+                              ->whereIn('id', $topSoldProductIds)
+                              ->get()
+                              ->sortBy(function ($model) use ($topSoldProductIds) {
+                                  return array_search($model->id, $topSoldProductIds);
+                              })
+                              ->values();
+            $bestSellers = $fetched;
+        }
+
+        // Fallback to featured / high view count if less than 4 actual best-sellers found
         if ($bestSellers->count() < 4) {
-            $bestSellers = Product::with(['brand', 'images', 'sizes', 'sizeStocks'])
-                                  ->where('is_active', true)
-                                  ->orderByDesc('id')
-                                  ->take(8)
-                                  ->get();
+            $excludeIds = $bestSellers->pluck('id')->toArray();
+            $fallback = Product::with(['brand', 'images', 'sizes', 'sizeStocks'])
+                               ->where('is_active', true)
+                               ->whereNotIn('id', $excludeIds)
+                               ->where(function ($q) {
+                                   $q->where('is_featured', true)
+                                     ->orWhere('view_count', '>', 5);
+                               })
+                               ->orderByDesc('view_count')
+                               ->take(8 - $bestSellers->count())
+                               ->get();
+
+            $bestSellers = $bestSellers->concat($fallback);
+        }
+
+        // If still less than 4, fill with latest active products
+        if ($bestSellers->count() < 4) {
+            $excludeIds = $bestSellers->pluck('id')->toArray();
+            $latest = Product::with(['brand', 'images', 'sizes', 'sizeStocks'])
+                             ->where('is_active', true)
+                             ->whereNotIn('id', $excludeIds)
+                             ->orderByDesc('id')
+                             ->take(8 - $bestSellers->count())
+                             ->get();
+            $bestSellers = $bestSellers->concat($latest);
         }
 
         // Special Discounted Products

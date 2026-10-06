@@ -189,6 +189,37 @@
             <!-- RIGHT: PRODUCT SETTINGS & STATUS (lg:col-span-4) -->
             <div class="lg:col-span-4 space-y-6">
                 
+                <!-- Performance Statistics -->
+                <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-xs space-y-4">
+                    <h3 class="font-sans font-bold text-sm text-[#111827] border-b border-[#E5E7EB] pb-3 flex items-center justify-between">
+                        <span><i class="fa-solid fa-chart-line text-blue-600 mr-2"></i> Ürün Performansı</span>
+                        <a href="{{ route('product.detail', $product->slug) }}" target="_blank" class="text-xs text-blue-600 hover:underline font-normal">
+                            Sitede Gör <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                            <span class="text-[11px] font-medium text-gray-500 block">Görüntülenme</span>
+                            <strong class="text-base font-bold text-[#111827]">{{ number_format($viewCount ?? 0) }}</strong>
+                        </div>
+                        <div class="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                            <span class="text-[11px] font-medium text-gray-500 block">Toplam Satış</span>
+                            <strong class="text-base font-bold text-emerald-600">{{ number_format($totalUnitsSold ?? 0) }} adet</strong>
+                        </div>
+                        <div class="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                            <span class="text-[11px] font-medium text-gray-500 block">Elde Edilen Ciro</span>
+                            <strong class="text-base font-bold text-blue-600">{{ number_format($totalRevenueGenerated ?? 0, 2, ',', '.') }} ₺</strong>
+                        </div>
+                        <div class="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+                            <span class="text-[11px] font-medium text-gray-500 block">Mevcut Stok</span>
+                            <strong class="text-base font-bold {{ ($totalAvailableStock ?? 0) <= 5 ? 'text-amber-600' : 'text-[#111827]' }}">
+                                {{ number_format($totalAvailableStock ?? 0) }} adet
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-xs space-y-6 sticky top-24">
                     <h3 class="font-sans font-bold text-sm text-[#111827] border-b border-[#E5E7EB] pb-3">
                         Yayınlama & Etiketler

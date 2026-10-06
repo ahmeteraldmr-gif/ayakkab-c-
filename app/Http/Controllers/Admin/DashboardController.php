@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\ContactMessage;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductSizeStock;
+use App\Models\StockNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -36,27 +39,51 @@ class DashboardController extends Controller
         
         $avgOrderValue = (float) (Order::where('status', '!=', 'iptal')->avg('total_amount') ?? 0);
 
-        // Best Selling Product
-        $topProductItem = OrderItem::select('product_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total) as total_sales'))
-                                   ->groupBy('product_id')
-                                   ->orderByDesc('total_qty')
-                                   ->with('product.brand')
-                                   ->first();
+        // Top 5 Best Selling Products
+        $top5Products = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+                                 ->where('orders.status', '!=', 'iptal')
+                                 ->whereNotNull('order_items.product_id')
+                                 ->select(
+                                     'order_items.product_id',
+                                     'order_items.product_name',
+                                     'order_items.product_image',
+                                     DB::raw('SUM(order_items.quantity) as total_qty'),
+                                     DB::raw('SUM(order_items.total) as total_revenue')
+                                 )
+                                 ->groupBy('order_items.product_id', 'order_items.product_name', 'order_items.product_image')
+                                 ->orderByDesc('total_qty')
+                                 ->take(5)
+                                 ->get();
 
-        // Best Selling Category
-        $topCategory = Category::join('products', 'categories.id', '=', 'products.category_id')
-                               ->join('order_items', 'products.id', '=', 'order_items.product_id')
-                               ->select('categories.name', DB::raw('SUM(order_items.quantity) as total_qty'))
-                               ->groupBy('categories.id', 'categories.name')
-                               ->orderByDesc('total_qty')
-                               ->first();
+        // Top Selling Sizes
+        $topSizes = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+                             ->where('orders.status', '!=', 'iptal')
+                             ->select('order_items.size_number', DB::raw('SUM(order_items.quantity) as total_qty'))
+                             ->groupBy('order_items.size_number')
+                             ->orderByDesc('total_qty')
+                             ->take(5)
+                             ->get();
 
-        // 3. Stock Health
+        // Top Selling Brand
+        $topBrand = Brand::join('products', 'brands.id', '=', 'products.brand_id')
+                         ->join('order_items', 'products.id', '=', 'order_items.product_id')
+                         ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                         ->where('orders.status', '!=', 'iptal')
+                         ->select('brands.name', DB::raw('SUM(order_items.quantity) as total_qty'))
+                         ->groupBy('brands.id', 'brands.name')
+                         ->orderByDesc('total_qty')
+                         ->first();
+
+        // Coupon Usages Count
+        $totalCouponUsage = (int) Coupon::sum('used_count');
+
+        // 3. Stock Health & Depleted Stock
         $lowStockCount = ProductSizeStock::where('stock', '<=', 3)->where('stock', '>', 0)->count();
         $outOfStockCount = ProductSizeStock::where('stock', '<=', 0)->count();
 
-        // 4. Unread Messages
+        // 4. Unread Messages & Notifications
         $unreadMessagesCount = ContactMessage::where('is_read', false)->count();
+        $pendingStockAlertsCount = StockNotification::where('is_notified', false)->count();
 
         // 5. Recent 6 Orders
         $recentOrders = Order::with('items')
@@ -64,7 +91,7 @@ class DashboardController extends Controller
                              ->take(6)
                              ->get();
 
-        // 6. Low stock items list (prioritizing 0 stock then 1-3)
+        // 6. Low / Out of stock items list
         $lowStockItems = ProductSizeStock::with(['product.brand', 'size'])
                                          ->where('stock', '<=', 3)
                                          ->whereHas('product')
@@ -111,11 +138,14 @@ class DashboardController extends Controller
             'monthRevenue',
             'last7DaysOrders',
             'avgOrderValue',
-            'topProductItem',
-            'topCategory',
+            'top5Products',
+            'topSizes',
+            'topBrand',
+            'totalCouponUsage',
             'lowStockCount',
             'outOfStockCount',
             'unreadMessagesCount',
+            'pendingStockAlertsCount',
             'recentOrders',
             'lowStockItems',
             'chartLabels',

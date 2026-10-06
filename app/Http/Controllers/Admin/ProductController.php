@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductSizeStock;
 use App\Models\Size;
+use App\Models\StockMovement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -105,7 +108,6 @@ class ProductController extends Controller
             DB::beginTransaction();
 
             $slug = Str::slug($validated['name']);
-            // Ensure unique slug
             $originalSlug = $slug;
             $count = 1;
             while (Product::where('slug', $slug)->exists()) {
@@ -148,22 +150,38 @@ class ProductController extends Controller
                 }
             }
 
-            // Save Size Stocks
+            // Save Size Stocks & record stock movements
             if ($request->filled('stocks')) {
                 foreach ($request->input('stocks') as $sizeId => $stockQty) {
                     if (is_numeric($stockQty) && $stockQty >= 0) {
+                        $qty = (int) $stockQty;
                         ProductSizeStock::create([
                             'product_id' => $product->id,
                             'size_id' => (int) $sizeId,
-                            'stock' => (int) $stockQty,
+                            'stock' => $qty,
                         ]);
+
+                        if ($qty > 0) {
+                            StockMovement::create([
+                                'product_id' => $product->id,
+                                'size_id' => (int) $sizeId,
+                                'user_id' => auth()->id(),
+                                'type' => 'manual_update',
+                                'quantity_before' => 0,
+                                'quantity_change' => $qty,
+                                'quantity_after' => $qty,
+                                'reason' => 'Yeni ürün ekleme başlangıç stoğu',
+                                'reference_type' => 'Product',
+                                'reference_id' => $product->id,
+                            ]);
+                        }
                     }
                 }
             }
 
             $this->normalizeProductImages($product->id);
 
-            \App\Models\AuditLog::record(
+            AuditLog::record(
                 'product_created',
                 Product::class,
                 $product->id,
@@ -180,7 +198,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Show edit form
+     * Show edit form with performance statistics
      */
     public function edit(Product $product): View
     {
@@ -191,7 +209,29 @@ class ProductController extends Controller
 
         $currentStocks = $product->sizeStocks->pluck('stock', 'size_id')->toArray();
 
-        return view('admin.products.edit', compact('product', 'categories', 'brands', 'sizes', 'currentStocks'));
+        // Product Performance Metrics
+        $totalUnitsSold = (int) OrderItem::where('product_id', $product->id)
+                                         ->whereHas('order', fn($q) => $q->where('status', '!=', 'iptal'))
+                                         ->sum('quantity');
+
+        $totalRevenueGenerated = (float) OrderItem::where('product_id', $product->id)
+                                                  ->whereHas('order', fn($q) => $q->where('status', '!=', 'iptal'))
+                                                  ->sum('total');
+
+        $totalAvailableStock = (int) $product->sizeStocks->sum('stock');
+        $viewCount = (int) $product->view_count;
+
+        return view('admin.products.edit', compact(
+            'product',
+            'categories',
+            'brands',
+            'sizes',
+            'currentStocks',
+            'totalUnitsSold',
+            'totalRevenueGenerated',
+            'totalAvailableStock',
+            'viewCount'
+        ));
     }
 
     /**
@@ -257,19 +297,40 @@ class ProductController extends Controller
                 }
             }
 
-            // Update Size Stocks
+            // Update Size Stocks & log movements if changed
             if ($request->filled('stocks')) {
                 foreach ($request->input('stocks') as $sizeId => $stockQty) {
-                    ProductSizeStock::updateOrCreate(
-                        ['product_id' => $product->id, 'size_id' => (int) $sizeId],
-                        ['stock' => (int) ($stockQty ?? 0)]
-                    );
+                    $newStock = (int) ($stockQty ?? 0);
+                    $existing = ProductSizeStock::where('product_id', $product->id)
+                                                ->where('size_id', (int) $sizeId)
+                                                ->first();
+                    $qtyBefore = $existing ? $existing->stock : 0;
+
+                    if ($qtyBefore !== $newStock) {
+                        ProductSizeStock::updateOrCreate(
+                            ['product_id' => $product->id, 'size_id' => (int) $sizeId],
+                            ['stock' => $newStock]
+                        );
+
+                        StockMovement::create([
+                            'product_id' => $product->id,
+                            'size_id' => (int) $sizeId,
+                            'user_id' => auth()->id(),
+                            'type' => 'manual_update',
+                            'quantity_before' => $qtyBefore,
+                            'quantity_change' => $newStock - $qtyBefore,
+                            'quantity_after' => $newStock,
+                            'reason' => 'Ürün düzenleme ekranından stok güncellendi',
+                            'reference_type' => 'Product',
+                            'reference_id' => $product->id,
+                        ]);
+                    }
                 }
             }
 
             $this->normalizeProductImages($product->id);
 
-            \App\Models\AuditLog::record(
+            AuditLog::record(
                 'product_updated',
                 Product::class,
                 $product->id,
@@ -301,7 +362,7 @@ class ProductController extends Controller
             }
             $product->delete();
 
-            \App\Models\AuditLog::record(
+            AuditLog::record(
                 'product_deleted',
                 Product::class,
                 $productId,

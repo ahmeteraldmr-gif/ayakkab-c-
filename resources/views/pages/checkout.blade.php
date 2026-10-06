@@ -166,17 +166,48 @@
                                 <span>Ara Toplam:</span>
                                 <strong class="text-dark">{{ $cartSummary['subtotal_formatted'] }}</strong>
                             </div>
+
+                            @if(!empty($cartSummary['discount_amount']) && $cartSummary['discount_amount'] > 0)
+                                <div class="flex items-center justify-between text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-100">
+                                    <span class="flex items-center font-medium">
+                                        <i class="fa-solid fa-tag mr-1.5 text-emerald-600"></i> Kupon İndirimi ({{ $cartSummary['coupon_code'] }}):
+                                    </span>
+                                    <strong class="font-bold">-{{ $cartSummary['discount_formatted'] }}</strong>
+                                </div>
+                            @endif
+
                             <div class="flex justify-between">
                                 <span>Kargo:</span>
                                 <strong class="{{ $cartSummary['shipping'] == 0 ? 'text-emerald-600' : 'text-dark' }}">
                                     {{ $cartSummary['shipping_formatted'] }}
                                 </strong>
                             </div>
+
                             <div class="flex justify-between text-base font-extrabold text-dark pt-2 border-t border-black/5">
                                 <span>Toplam Tutar:</span>
                                 <span class="text-xl text-dark">{{ $cartSummary['total_formatted'] }}</span>
                             </div>
                         </div>
+
+                        <!-- Coupon Box -->
+                        @if(empty($cartSummary['has_coupon']))
+                            <div class="pt-2">
+                                <div class="flex items-center space-x-2">
+                                    <input type="text" id="checkoutCouponCode" placeholder="İndirim Kodu" class="flex-grow px-3 py-2 bg-[#F7F7F5] border border-black/10 rounded-xl text-xs uppercase tracking-wider font-semibold focus:outline-none focus:border-accent">
+                                    <button type="button" onclick="applyCheckoutCoupon()" class="px-3.5 py-2 bg-dark hover:bg-accent text-white hover:text-dark text-xs font-bold rounded-xl transition-colors whitespace-nowrap">
+                                        Uygula
+                                    </button>
+                                </div>
+                            </div>
+                        @else
+                            <div class="pt-2 flex items-center justify-between text-xs text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
+                                <span class="font-bold flex items-center"><i class="fa-solid fa-circle-check mr-1.5"></i> Kupon: {{ $cartSummary['coupon_code'] }}</span>
+                                <form method="POST" action="{{ route('coupon.remove') }}">
+                                    @csrf
+                                    <button type="submit" class="text-rose-600 hover:text-rose-800 font-bold hover:underline">Kaldır</button>
+                                </form>
+                            </div>
+                        @endif
 
                         <!-- Submit Order Button -->
                         <button type="submit" id="checkoutSubmitBtn" class="w-full h-14 bg-dark hover:bg-accent text-white hover:text-dark font-display font-bold text-sm uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-black/10 flex items-center justify-center space-x-2">
@@ -198,6 +229,34 @@
 
 @push('scripts')
 <script>
+    function applyCheckoutCoupon() {
+        const codeInput = document.getElementById('checkoutCouponCode');
+        const code = codeInput ? codeInput.value.trim() : '';
+        if (!code) {
+            showToast('Lütfen kupon kodunu girin.', 'error');
+            return;
+        }
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("coupon.apply") }}';
+        
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = csrfToken;
+        form.appendChild(csrf);
+
+        const codeF = document.createElement('input');
+        codeF.type = 'hidden';
+        codeF.name = 'code';
+        codeF.value = code;
+        form.appendChild(codeF);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
     document.querySelector('form[action="{{ route('checkout.process') }}"]')?.addEventListener('submit', function(e) {
         const btn = document.getElementById('checkoutSubmitBtn');
         if (btn) {

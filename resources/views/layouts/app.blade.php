@@ -217,6 +217,9 @@
                     <a href="{{ route('products.index', ['gender' => 'kadin']) }}" class="nav-link-item {{ request('gender') === 'kadin' ? 'text-accent' : 'text-white/90 hover:text-accent' }} transition-colors">
                         Kadın
                     </a>
+                    <a href="{{ route('order.track.index') }}" class="nav-link-item {{ request()->routeIs('order.track.*') ? 'text-accent' : 'text-white/90 hover:text-accent' }} transition-colors">
+                        Sipariş Takip
+                    </a>
                     <a href="{{ route('about') }}" class="nav-link-item {{ request()->routeIs('about') ? 'text-accent' : 'text-white/90 hover:text-accent' }} transition-colors">
                         Hakkımızda
                     </a>
@@ -302,6 +305,11 @@
 
             <a href="{{ route('size.guide') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between px-4 py-3 rounded-xl text-white/80 hover:bg-white/5 transition-colors">
                 <span class="flex items-center text-sm"><i class="fa-solid fa-ruler-combined mr-3 text-accent w-5 text-center"></i> Numara Rehberi</span>
+                <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
+            </a>
+
+            <a href="{{ route('order.track.index') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between px-4 py-3 rounded-xl {{ request()->routeIs('order.track.*') ? 'bg-accent/15 text-accent font-bold' : 'text-white/90 hover:bg-white/5' }} transition-colors">
+                <span class="flex items-center text-sm"><i class="fa-solid fa-truck-fast mr-3 text-accent w-5 text-center"></i> Sipariş Takip</span>
                 <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
             </a>
 
@@ -403,6 +411,7 @@
                     <ul class="space-y-2.5 text-sm text-white/70">
                         <li><a href="{{ route('home') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-chevron-right text-[10px] mr-2 text-accent"></i> Ana Sayfa</a></li>
                         <li><a href="{{ route('products.index') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-chevron-right text-[10px] mr-2 text-accent"></i> Tüm Modeller</a></li>
+                        <li><a href="{{ route('order.track.index') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-chevron-right text-[10px] mr-2 text-accent"></i> Sipariş Takip</a></li>
                         <li><a href="{{ route('products.index', ['discounted' => 1]) }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-chevron-right text-[10px] mr-2 text-accent"></i> İndirimli Ürünler</a></li>
                         <li><a href="{{ route('about') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-chevron-right text-[10px] mr-2 text-accent"></i> Hakkımızda</a></li>
                         <li><a href="{{ route('contact') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-chevron-right text-[10px] mr-2 text-accent"></i> İletişim</a></li>

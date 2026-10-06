@@ -4,7 +4,12 @@ namespace App\Providers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\ContactMessage;
+use App\Models\Order;
+use App\Models\ProductSizeStock;
+use App\Models\StockNotification;
 use App\Services\CartService;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,11 +29,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->environment('production')) {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+            URL::forceScheme('https');
         }
 
-        // Bind global store data only to root layout views with in-memory request-level memoization
-        View::composer(['layouts.app', 'layouts.admin', 'pages.*'], function ($view) {
+        // 1. Bind global store data to customer layouts
+        View::composer(['layouts.app', 'pages.*'], function ($view) {
             try {
                 static $cachedCategories = null;
                 static $cachedBrands = null;
@@ -51,6 +56,32 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             } catch (\Throwable $e) {
                 // Ignore during migrations / early bootstrap
+            }
+        });
+
+        // 2. Admin Notification Center Composer
+        View::composer('layouts.admin', function ($view) {
+            try {
+                static $adminNotificationData = null;
+
+                if ($adminNotificationData === null) {
+                    $newOrders = Order::where('status', 'yeni')->count();
+                    $unreadMessages = ContactMessage::where('is_read', false)->count();
+                    $lowStock = ProductSizeStock::where('stock', '<=', 3)->count();
+                    $pendingAlerts = StockNotification::where('is_notified', false)->count();
+
+                    $adminNotificationData = [
+                        'adminNewOrdersCount' => $newOrders,
+                        'adminUnreadMessagesCount' => $unreadMessages,
+                        'adminLowStockCount' => $lowStock,
+                        'adminPendingAlertsCount' => $pendingAlerts,
+                        'adminTotalNotifications' => ($newOrders + $unreadMessages + $pendingAlerts),
+                    ];
+                }
+
+                $view->with($adminNotificationData);
+            } catch (\Throwable $e) {
+                // Ignore if DB not ready
             }
         });
     }

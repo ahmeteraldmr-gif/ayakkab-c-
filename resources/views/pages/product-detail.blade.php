@@ -7,6 +7,80 @@
 
 @section('content')
 
+    @php
+        $breadcrumbItems = [
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => 'Ana Sayfa',
+                'item' => route('home'),
+            ],
+            [
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => 'Ürünler',
+                'item' => route('products.index'),
+            ],
+        ];
+
+        if ($product->category) {
+            $breadcrumbItems[] = [
+                '@type' => 'ListItem',
+                'position' => 3,
+                'name' => $product->category->name,
+                'item' => route('products.index', ['category' => $product->category->slug]),
+            ];
+            $breadcrumbItems[] = [
+                '@type' => 'ListItem',
+                'position' => 4,
+                'name' => $product->name,
+                'item' => url()->current(),
+            ];
+        } else {
+            $breadcrumbItems[] = [
+                '@type' => 'ListItem',
+                'position' => 3,
+                'name' => $product->name,
+                'item' => url()->current(),
+            ];
+        }
+
+        $productJsonLd = [
+            '@context' => 'https://schema.org/',
+            '@type' => 'Product',
+            'name' => $product->name,
+            'image' => [$product->primary_image_url],
+            'description' => $product->short_description ?? $product->name,
+            'sku' => $product->sku,
+            'brand' => [
+                '@type' => 'Brand',
+                'name' => $product->brand?->name ?? 'Yusuf Akboğa',
+            ],
+            'offers' => [
+                '@type' => 'Offer',
+                'url' => url()->current(),
+                'priceCurrency' => 'TRY',
+                'price' => $product->effective_price,
+                'availability' => $product->total_stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                'itemCondition' => 'https://schema.org/NewCondition',
+            ]
+        ];
+
+        $breadcrumbJsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $breadcrumbItems,
+        ];
+    @endphp
+
+    <!-- JSON-LD Product & Breadcrumb Schema -->
+    <script type="application/ld+json">
+    {!! json_encode($productJsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+    <script type="application/ld+json">
+    {!! json_encode($breadcrumbJsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+
     <!-- Breadcrumb -->
     <div class="bg-dark text-white py-4 border-b border-white/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -190,11 +264,13 @@
                                     </button>
                                 @else
                                     <button type="button" 
-                                            disabled 
-                                            class="py-3 rounded-xl border border-black/5 bg-[#F0F0EE] text-black/30 font-display font-bold text-sm line-through cursor-not-allowed flex flex-col items-center justify-center"
-                                            title="Tükendi">
-                                        <span>{{ $sItem['size_number'] }}</span>
-                                        <span class="text-[9px] text-black/30 mt-0.5 font-normal">Tükendi</span>
+                                            onclick="openStockNotifyModal({{ $sItem['size_id'] }}, '{{ $sItem['size_number'] }}')"
+                                            class="py-3 rounded-xl border border-rose-200 bg-rose-50/40 text-rose-700 hover:bg-rose-100 hover:border-rose-300 font-display font-bold text-sm flex flex-col items-center justify-center transition-colors cursor-pointer"
+                                            title="Tükendi - Stok Gelince Haber Ver">
+                                        <span class="line-through text-black/40">{{ $sItem['size_number'] }}</span>
+                                        <span class="text-[9px] text-rose-600 mt-0.5 font-semibold flex items-center">
+                                            <i class="fa-regular fa-bell text-[8px] mr-1"></i> Haber Ver
+                                        </span>
                                     </button>
                                 @endif
                             @endforeach
@@ -203,6 +279,16 @@
                         <!-- Selected Size Alert / Validation Feedback -->
                         <div id="sizeAlertText" class="mt-2 text-xs font-semibold text-rose-600 hidden">
                             <i class="fa-solid fa-circle-exclamation mr-1"></i> Lütfen devam etmek için bir numara seçiniz.
+                        </div>
+
+                        <!-- Stock Notification Notice -->
+                        <div class="mt-3 flex items-center justify-between text-xs text-black/60 bg-[#F7F7F5] p-3 rounded-xl">
+                            <span class="flex items-center">
+                                <i class="fa-regular fa-bell text-accent mr-1.5"></i> Numaranız tükenmiş mi?
+                            </span>
+                            <button type="button" onclick="openStockNotifyModal(null, 'Tüm Bedenler')" class="font-bold text-dark hover:text-accent underline transition-colors">
+                                Stok Gelince Haber Ver
+                            </button>
                         </div>
                     </div>
 
@@ -367,6 +453,54 @@
         </div>
     </div>
 
+    <!-- STOCK NOTIFICATION MODAL -->
+    <div id="stockNotifyModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 sm:p-8 shadow-2xl relative">
+            <div class="flex items-center justify-between border-b border-black/5 pb-4 mb-5">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-50 text-accent flex items-center justify-center">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-extrabold text-base text-dark">Stok Gelince Haber Ver</h3>
+                        <p class="text-black/50 text-xs mt-0.5 truncate max-w-[200px]">{{ $product->name }}</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeStockNotifyModal()" class="text-black/40 hover:text-dark text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="stockNotifyForm" onsubmit="handleStockNotifySubmit(event)" class="space-y-4">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <input type="hidden" name="size_id" id="notifySizeId" value="">
+
+                <div class="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-xs text-amber-900 flex items-center justify-between">
+                    <span>İstenen Numara:</span>
+                    <strong id="notifySizeBadge" class="font-bold text-xs bg-white px-2.5 py-0.5 rounded-lg border border-amber-200">Tüm Bedenler</strong>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-dark mb-1">E-posta Adresiniz</label>
+                    <input type="email" name="email" id="notifyEmail" placeholder="ornek@mail.com" class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-3.5 py-2.5 text-xs text-dark focus:outline-none focus:border-accent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-dark mb-1">veya Telefon Numaranız (SMS için)</label>
+                    <input type="tel" name="phone" id="notifyPhone" placeholder="05XXXXXXXXX" class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-3.5 py-2.5 text-xs text-dark focus:outline-none focus:border-accent">
+                </div>
+
+                <p class="text-[11px] text-black/50">Bu ürün stoğa girdiğinde size e-posta veya SMS ile anında bildirim göndereceğiz.</p>
+
+                <button type="submit" id="stockNotifyBtn" class="w-full py-3 bg-dark hover:bg-accent text-white hover:text-dark font-display font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Bildirim Kaydı Oluştur</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
@@ -451,6 +585,70 @@
         });
     }
 
+    // Stock Notification Handlers
+    function openStockNotifyModal(sizeId, sizeNum) {
+        const modal = document.getElementById('stockNotifyModal');
+        document.getElementById('notifySizeId').value = sizeId || '';
+        document.getElementById('notifySizeBadge').innerText = sizeNum || 'Tüm Bedenler';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeStockNotifyModal() {
+        const modal = document.getElementById('stockNotifyModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function handleStockNotifySubmit(e) {
+        e.preventDefault();
+        const form = document.getElementById('stockNotifyForm');
+        const email = document.getElementById('notifyEmail').value.trim();
+        const phone = document.getElementById('notifyPhone').value.trim();
+
+        if (!email && !phone) {
+            showToast('Lütfen e-posta veya telefon numaranızdan en az birini girin.', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('stockNotifyBtn');
+        const origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Kaydediliyor...</span>';
+
+        fetch('{{ route("stock.notify") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: {{ $product->id }},
+                size_id: document.getElementById('notifySizeId').value || null,
+                email: email || null,
+                phone: phone || null
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+            if (data.success) {
+                showToast(data.message, 'success');
+                closeStockNotifyModal();
+                form.reset();
+            } else {
+                showToast(data.message || 'Kayıt yapılamadı.', 'error');
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+            showToast('İşlem sırasında hata oluştu.', 'error');
+        });
+    }
+
     // Modal Handlers
     function openSizeGuideModal() {
         const modal = document.getElementById('sizeGuideModal');
@@ -466,6 +664,9 @@
 
     document.getElementById('sizeGuideModal')?.addEventListener('click', function(e) {
         if (e.target === this) closeSizeGuideModal();
+    });
+    document.getElementById('stockNotifyModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeStockNotifyModal();
     });
 
     // Image Zoom Effect on Hover

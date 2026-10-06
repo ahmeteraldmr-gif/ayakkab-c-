@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductSizeStock;
 use App\Models\Size;
+use App\Models\StockMovement;
+use App\Models\StockNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,7 +58,10 @@ class StockController extends Controller
         $categories = Category::orderBy('name')->get();
         $brands = Brand::orderBy('name')->get();
 
-        return view('admin.stocks.index', compact('products', 'sizes', 'categories', 'brands'));
+        // Pending stock notifications count
+        $pendingStockAlertsCount = StockNotification::where('is_notified', false)->count();
+
+        return view('admin.stocks.index', compact('products', 'sizes', 'categories', 'brands', 'pendingStockAlertsCount'));
     }
 
     /**
@@ -64,26 +70,50 @@ class StockController extends Controller
     public function bulkUpdate(Request $request): RedirectResponse|JsonResponse
     {
         $stocks = $request->input('stocks', []);
+        $updatedCount = 0;
 
         foreach ($stocks as $productId => $sizeData) {
             if (is_array($sizeData)) {
                 foreach ($sizeData as $sizeId => $qty) {
                     if (is_numeric($qty) && $qty >= 0) {
-                        ProductSizeStock::updateOrCreate(
-                            ['product_id' => (int) $productId, 'size_id' => (int) $sizeId],
-                            ['stock' => (int) $qty]
-                        );
+                        $newStock = (int) $qty;
+                        $existing = ProductSizeStock::where('product_id', (int) $productId)
+                                                    ->where('size_id', (int) $sizeId)
+                                                    ->first();
+                        $qtyBefore = $existing ? $existing->stock : 0;
+
+                        if ($qtyBefore !== $newStock) {
+                            ProductSizeStock::updateOrCreate(
+                                ['product_id' => (int) $productId, 'size_id' => (int) $sizeId],
+                                ['stock' => $newStock]
+                            );
+
+                            StockMovement::create([
+                                'product_id' => (int) $productId,
+                                'size_id' => (int) $sizeId,
+                                'user_id' => auth()->id(),
+                                'type' => 'manual_update',
+                                'quantity_before' => $qtyBefore,
+                                'quantity_change' => $newStock - $qtyBefore,
+                                'quantity_after' => $newStock,
+                                'reason' => 'Toplu stok matrisi güncellemesi',
+                                'reference_type' => 'Product',
+                                'reference_id' => (int) $productId,
+                            ]);
+
+                            $updatedCount++;
+                        }
                     }
                 }
             }
         }
 
-        if (!empty($stocks)) {
-            \App\Models\AuditLog::record(
+        if ($updatedCount > 0) {
+            AuditLog::record(
                 'stocks_bulk_updated',
                 Product::class,
                 null,
-                'Toplu stok güncellemesi yapıldı (' . count($stocks) . ' ürün etkilendi).'
+                "Toplu stok güncellemesi yapıldı ({$updatedCount} numara/ürün stoku güncellendi)."
             );
         }
 
@@ -105,16 +135,37 @@ class StockController extends Controller
             'stock' => 'required|integer|min:0|max:9999',
         ]);
 
+        $existing = ProductSizeStock::where('product_id', $validated['product_id'])
+                                    ->where('size_id', $validated['size_id'])
+                                    ->first();
+        $qtyBefore = $existing ? $existing->stock : 0;
+        $newStock = $validated['stock'];
+
         $stockRecord = ProductSizeStock::updateOrCreate(
             ['product_id' => $validated['product_id'], 'size_id' => $validated['size_id']],
-            ['stock' => $validated['stock']]
+            ['stock' => $newStock]
         );
 
-        \App\Models\AuditLog::record(
+        if ($qtyBefore !== $newStock) {
+            StockMovement::create([
+                'product_id' => $validated['product_id'],
+                'size_id' => $validated['size_id'],
+                'user_id' => auth()->id(),
+                'type' => 'manual_update',
+                'quantity_before' => $qtyBefore,
+                'quantity_change' => $newStock - $qtyBefore,
+                'quantity_after' => $newStock,
+                'reason' => 'Hızlı stok güncellemesi',
+                'reference_type' => 'Product',
+                'reference_id' => $validated['product_id'],
+            ]);
+        }
+
+        AuditLog::record(
             'stock_quick_updated',
             Product::class,
             $validated['product_id'],
-            "Ürün #{$validated['product_id']} Beden #{$validated['size_id']} stok miktarı {$validated['stock']} yapıldı."
+            "Ürün #{$validated['product_id']} Beden #{$validated['size_id']} stok miktarı {$qtyBefore} -> {$newStock} yapıldı."
         );
 
         return response()->json([

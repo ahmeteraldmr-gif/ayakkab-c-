@@ -27,6 +27,12 @@ class Order extends Model
         'status',
         'payment_method',
         'payment_status',
+        'shipping_company',
+        'tracking_number',
+        'tracking_url',
+        'shipped_at',
+        'delivered_at',
+        'coupon_code',
     ];
 
     protected function casts(): array
@@ -36,6 +42,8 @@ class Order extends Model
             'shipping_cost' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
+            'shipped_at' => 'datetime',
+            'delivered_at' => 'datetime',
         ];
     }
 
@@ -82,6 +90,44 @@ class Order extends Model
     public function getFormattedTotalAttribute(): string
     {
         return number_format((float) $this->total_amount, 2, ',', '.') . ' ₺';
+    }
+
+    public function getEffectiveTrackingUrlAttribute(): ?string
+    {
+        if (!empty($this->tracking_url)) {
+            return $this->tracking_url;
+        }
+
+        if (empty($this->tracking_number)) {
+            return null;
+        }
+
+        $company = mb_strtolower((string) $this->shipping_company, 'UTF-8');
+        $code = urlencode(trim((string) $this->tracking_number));
+
+        if (str_contains($company, 'yurtiçi') || str_contains($company, 'yurtici')) {
+            return "https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code={$code}";
+        }
+        if (str_contains($company, 'aras')) {
+            return "https://www.araskargo.com.tr/kargo-takip?kargo_takip_no={$code}";
+        }
+        if (str_contains($company, 'mng')) {
+            return "https://www.mngkargo.com.tr/gonderitakip?trackingNumber={$code}";
+        }
+        if (str_contains($company, 'ptt')) {
+            return "https://gonderitakip.ptt.gov.tr/Track/Verify?q={$code}";
+        }
+        if (str_contains($company, 'sürat') || str_contains($company, 'surat')) {
+            return "https://www.suratkargo.com.tr/KargoTakip/?kargotakipno={$code}";
+        }
+        if (str_contains($company, 'hepsijet')) {
+            return "https://hepsijet.com/gonderi-takibi/{$code}";
+        }
+        if (str_contains($company, 'trendyol')) {
+            return "https://kargotakip.trendyol.com/?trackingNumber={$code}";
+        }
+
+        return null;
     }
 
     /**

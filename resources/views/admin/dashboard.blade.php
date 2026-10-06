@@ -62,25 +62,11 @@ Dashboard &amp; Mağaza Özeti
                 <span class="text-[12px] text-amber-600 mt-1 block font-medium"><strong class="font-bold">{{ $pendingOrders }}</strong> bekleyen sipariş</span>
             </div>
 
-            <!-- 4. Ortalama Sipariş Tutarı -->
-            <div class="bg-white border border-[#E5E7EB] hover:border-blue-500/40 rounded-2xl p-4.5 relative overflow-hidden transition-all duration-200 shadow-xs hover:shadow-sm group">
-                <div class="flex items-center justify-between mb-2.5">
-                    <span class="text-[11.5px] font-bold text-gray-500 uppercase tracking-wider">Sepet Ortalaması</span>
-                    <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
-                        <i class="fa-solid fa-calculator"></i>
-                    </div>
-                </div>
-                <div class="font-sans font-extrabold text-xl sm:text-2xl text-[#111827] tracking-tight">
-                    {{ number_format($avgOrderValue, 2, ',', '.') }} ₺
-                </div>
-                <span class="text-[12px] text-gray-500 mt-1 block">Sipariş başına tutar</span>
-            </div>
-
-            <!-- 5. Toplam Ürün / Model -->
+            <!-- 4. Toplam Ürün -->
             <div class="bg-white border border-[#E5E7EB] hover:border-blue-500/40 rounded-2xl p-4.5 relative overflow-hidden transition-all duration-200 shadow-xs hover:shadow-sm group">
                 <div class="flex items-center justify-between mb-2.5">
                     <span class="text-[11.5px] font-bold text-gray-500 uppercase tracking-wider">Toplam Ürün</span>
-                    <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+                    <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
                         <i class="fa-solid fa-shoe-prints"></i>
                     </div>
                 </div>
@@ -88,6 +74,20 @@ Dashboard &amp; Mağaza Özeti
                     {{ $totalProducts }}
                 </div>
                 <span class="text-[12px] text-gray-500 mt-1 block">Aktif katalog modelleri</span>
+            </div>
+
+            <!-- 5. Kupon Kullanımları -->
+            <div class="bg-white border border-[#E5E7EB] hover:border-blue-500/40 rounded-2xl p-4.5 relative overflow-hidden transition-all duration-200 shadow-xs hover:shadow-sm group">
+                <div class="flex items-center justify-between mb-2.5">
+                    <span class="text-[11.5px] font-bold text-gray-500 uppercase tracking-wider">Kupon Kullanımı</span>
+                    <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-ticket"></i>
+                    </div>
+                </div>
+                <div class="font-sans font-extrabold text-xl sm:text-2xl text-[#111827] tracking-tight">
+                    {{ $totalCouponUsage }}
+                </div>
+                <span class="text-[12px] text-gray-500 mt-1 block">Toplam indirim kullanımı</span>
             </div>
 
             <!-- 6. Kritik Stok Uyarısı -->
@@ -143,15 +143,15 @@ Dashboard &amp; Mağaza Özeti
                         <span class="font-sans font-bold text-base text-[#111827] mt-0.5 block">{{ $last7DaysOrders }} Sipariş</span>
                     </div>
                     <div class="bg-[#F8FAFC] rounded-xl p-3.5 border border-[#E2E8F0]">
-                        <span class="text-[11px] font-semibold text-gray-500 block uppercase tracking-wider">En Çok Satan Model</span>
-                        <span class="font-sans font-bold text-sm text-blue-600 mt-0.5 block truncate" title="{{ $topProductItem?->product?->name ?? 'Henüz veri yok' }}">
-                            {{ $topProductItem?->product?->name ?? 'Henüz veri yok' }}
+                        <span class="text-[11px] font-semibold text-gray-500 block uppercase tracking-wider">En Popüler Marka</span>
+                        <span class="font-sans font-bold text-sm text-blue-600 mt-0.5 block truncate">
+                            {{ $topBrand?->name ?? 'Nike / Adidas' }}
                         </span>
                     </div>
                     <div class="bg-[#F8FAFC] rounded-xl p-3.5 border border-[#E2E8F0]">
-                        <span class="text-[11px] font-semibold text-gray-500 block uppercase tracking-wider">En Popüler Kategori</span>
-                        <span class="font-sans font-bold text-sm text-[#111827] mt-0.5 block">
-                            {{ $topCategory?->name ?? 'Sneaker' }}
+                        <span class="text-[11px] font-semibold text-gray-500 block uppercase tracking-wider">Bekleyen Stok Talebi</span>
+                        <span class="font-sans font-bold text-sm text-purple-600 mt-0.5 block">
+                            {{ $pendingStockAlertsCount }} Müşteri Talebi
                         </span>
                     </div>
                 </div>
@@ -216,7 +216,113 @@ Dashboard &amp; Mağaza Özeti
 
         </div>
 
-        <!-- 3. ALT BÖLÜM: SON SİPARİŞLER (SOL %65) & HIZLI İŞLEMLER + MESAJLAR (SAĞ %35) -->
+        <!-- 3. EN ÇOK SATAN 5 ÜRÜN & EN ÇOK SATAN NUMARALAR -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+            
+            <!-- EN ÇOK SATAN 5 ÜRÜN TABLOSU -->
+            <div class="lg:col-span-8 bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+                <div class="flex items-center justify-between border-b border-[#E5E7EB] pb-3.5">
+                    <div>
+                        <h3 class="font-sans font-bold text-base text-[#111827] flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-amber-500"></i>
+                            <span>En Çok Satan 5 Ürün</span>
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Gerçek sipariş satış adetleri ve ciro katkısı</p>
+                    </div>
+                    <a href="{{ route('admin.products.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                        <span>Tüm Ürünler</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+
+                @if($top5Products->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-[#F9FAFB] text-gray-500 border-b border-[#E5E7EB] font-semibold uppercase tracking-wider">
+                                <tr>
+                                    <th class="py-3 px-3.5">Ürün</th>
+                                    <th class="py-3 px-3.5 text-center">Satılan Adet</th>
+                                    <th class="py-3 px-3.5 text-right">Toplam Satış Tutarı</th>
+                                    <th class="py-3 px-3.5 text-right">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#F3F4F6]">
+                                @foreach($top5Products as $idx => $tProd)
+                                    <tr class="hover:bg-[#F8FAFC] transition-colors">
+                                        <td class="py-3 px-3.5">
+                                            <div class="flex items-center space-x-3">
+                                                <span class="w-6 h-6 rounded-full bg-amber-50 text-amber-700 font-bold flex items-center justify-center text-xs flex-shrink-0">
+                                                    #{{ $idx + 1 }}
+                                                </span>
+                                                @if($tProd->product_image)
+                                                    <img src="{{ $tProd->product_image }}" alt="{{ $tProd->product_name }}" class="w-10 h-10 object-cover rounded-lg border border-gray-100 flex-shrink-0">
+                                                @endif
+                                                <span class="font-bold text-gray-900 truncate max-w-xs">{{ $tProd->product_name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-3.5 text-center">
+                                            <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-bold">
+                                                {{ $tProd->total_qty }} Adet
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-3.5 text-right font-extrabold text-gray-900">
+                                            {{ number_format((float)$tProd->total_revenue, 2, ',', '.') }} ₺
+                                        </td>
+                                        <td class="py-3 px-3.5 text-right">
+                                            @if($tProd->product_id)
+                                                <a href="{{ route('admin.products.edit', $tProd->product_id) }}" class="p-1.5 text-gray-400 hover:text-blue-600 transition-colors" title="Düzenle">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-8 text-gray-400 text-xs">
+                        Henüz tamamlanmış satış verisi bulunmuyor.
+                    </div>
+                @endif
+            </div>
+
+            <!-- EN ÇOK SATAN NUMARALAR WIDGET -->
+            <div class="lg:col-span-4 bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+                <div class="border-b border-[#E5E7EB] pb-3.5">
+                    <h3 class="font-sans font-bold text-sm text-[#111827] flex items-center gap-2">
+                        <i class="fa-solid fa-ruler-horizontal text-purple-600"></i>
+                        <span>En Çok Satan Numaralar</span>
+                    </h3>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Müşterilerin en çok tercih ettiği ayak bedenleri</p>
+                </div>
+
+                @if($topSizes->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($topSizes as $s)
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 font-extrabold text-sm flex items-center justify-center border border-purple-200">
+                                        {{ $s->size_number }}
+                                    </div>
+                                    <span class="text-xs font-semibold text-gray-800">{{ $s->size_number }} Numara</span>
+                                </div>
+                                <span class="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100">
+                                    {{ $s->total_qty }} Adet Satıldı
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-8 text-gray-400 text-xs">
+                        Henüz beden satış verisi yok.
+                    </div>
+                @endif
+            </div>
+
+        </div>
+
+        <!-- 4. ALT BÖLÜM: SON SİPARİŞLER (SOL %65) & HIZLI İŞLEMLER + MESAJLAR (SAĞ %35) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
             
             <!-- SOL %65: SON SİPARİŞLER TABLOSU -->
@@ -311,9 +417,9 @@ Dashboard &amp; Mağaza Özeti
                             <i class="fa-solid fa-boxes-stacked text-blue-600 group-hover:scale-110 text-base mb-1.5 transition-transform"></i>
                             <span>Stok Güncelle</span>
                         </a>
-                        <a href="{{ route('admin.campaigns.create') }}" class="p-3 rounded-xl bg-[#F8FAFC] hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold transition-all border border-[#E2E8F0] hover:border-blue-200 flex flex-col items-center text-center group">
-                            <i class="fa-solid fa-bullhorn text-blue-600 group-hover:scale-110 text-base mb-1.5 transition-transform"></i>
-                            <span>Kampanya Ekle</span>
+                        <a href="{{ route('admin.coupons.create') }}" class="p-3 rounded-xl bg-[#F8FAFC] hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-semibold transition-all border border-[#E2E8F0] hover:border-blue-200 flex flex-col items-center text-center group">
+                            <i class="fa-solid fa-ticket text-blue-600 group-hover:scale-110 text-base mb-1.5 transition-transform"></i>
+                            <span>Kupon Ekle</span>
                         </a>
                     </div>
                 </div>

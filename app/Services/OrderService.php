@@ -2,13 +2,19 @@
 
 namespace App\Services;
 
+use App\Mail\OrderCreatedAdminMail;
+use App\Mail\OrderCreatedCustomerMail;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductSizeStock;
 use App\Models\Setting;
 use App\Models\Size;
+use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class OrderService
@@ -21,7 +27,7 @@ class OrderService
     }
 
     /**
-     * Create order with strict DB price calculation and stock locking
+     * Create order with strict DB price calculation, stock locking, coupon and stock movements
      */
     public function createOrder(array $validatedData): array
     {
@@ -87,6 +93,7 @@ class OrderService
 
                     $orderItemsToCreate[] = [
                         'product_id' => $product->id,
+                        'size_id' => $size->id,
                         'product_name' => $product->name,
                         'product_sku' => $product->sku,
                         'product_image' => $product->primary_image_url,
@@ -102,13 +109,31 @@ class OrderService
                     throw new \Exception('Sipariş oluşturulacak geçerli ürün bulunamadı.');
                 }
 
-                // 2. Calculate shipping cost from DB settings
+                // 2. Validate Coupon and Calculate Discount (strictly from DB)
+                $discountAmount = 0.0;
+                $couponCode = null;
+                $appliedCoupon = $this->cartService->getValidCoupon();
+
+                if ($appliedCoupon) {
+                    $couponRecord = Coupon::where('id', $appliedCoupon->id)->lockForUpdate()->first();
+                    if ($couponRecord) {
+                        $couponVal = $couponRecord->validateForSubtotal($subtotal);
+                        if ($couponVal['valid']) {
+                            $discountAmount = (float) $couponVal['discount'];
+                            $couponCode = $couponRecord->code;
+                            $couponRecord->increment('used_count');
+                        }
+                    }
+                }
+
+                // 3. Calculate shipping cost from DB settings
                 $freeShippingThreshold = (float) Setting::get('free_shipping_threshold', 1500);
                 $defaultShippingCost = (float) Setting::get('shipping_cost', 99);
                 $shippingCost = ($subtotal >= $freeShippingThreshold) ? 0.0 : $defaultShippingCost;
-                $totalAmount = $subtotal + $shippingCost;
+                
+                $totalAmount = max(0.0, ($subtotal - $discountAmount)) + $shippingCost;
 
-                // 3. Generate Unique Order Number
+                // 4. Generate Unique Order Number
                 $year = date('Y');
                 do {
                     $randomSeq = str_pad((string) mt_rand(100001, 999999), 6, '0', STR_PAD_LEFT);
@@ -117,7 +142,7 @@ class OrderService
 
                 $accessToken = Str::random(40);
 
-                // 4. Create Order
+                // 5. Create Order
                 $order = Order::create([
                     'order_number' => $orderNumber,
                     'access_token' => $accessToken,
@@ -130,33 +155,69 @@ class OrderService
                     'order_notes' => $validatedData['order_notes'] ?? null,
                     'subtotal' => $subtotal,
                     'shipping_cost' => $shippingCost,
-                    'discount_amount' => 0.0,
+                    'discount_amount' => $discountAmount,
+                    'coupon_code' => $couponCode,
                     'total_amount' => $totalAmount,
                     'status' => 'yeni',
                     'payment_method' => $validatedData['payment_method'],
                     'payment_status' => $validatedData['payment_method'] === 'kapida_odeme' ? 'kapida_odenecek' : 'beklemede',
                 ]);
 
-                // 5. Create Order Items & Deduct Stock
+                // 6. Create Order Items, Deduct Stock & Record Stock Movements
                 foreach ($orderItemsToCreate as $itemData) {
                     $stockRecord = $itemData['stock_record'];
-                    unset($itemData['stock_record']);
+                    $sizeId = $itemData['size_id'];
+                    unset($itemData['stock_record'], $itemData['size_id']);
 
                     $itemData['order_id'] = $order->id;
                     OrderItem::create($itemData);
 
+                    $qtyBefore = (int) $stockRecord->stock;
+                    $qtyChange = -(int) $itemData['quantity'];
+                    $qtyAfter = max(0, $qtyBefore + $qtyChange);
+
                     // Safely decrement locked stock
                     $stockRecord->decrement('stock', $itemData['quantity']);
+
+                    // Log Stock Movement
+                    StockMovement::create([
+                        'product_id' => $itemData['product_id'],
+                        'size_id' => $sizeId,
+                        'user_id' => auth()->id(),
+                        'type' => 'order',
+                        'quantity_before' => $qtyBefore,
+                        'quantity_change' => $qtyChange,
+                        'quantity_after' => $qtyAfter,
+                        'reason' => "Sipariş: {$order->order_number}",
+                        'reference_type' => 'Order',
+                        'reference_id' => $order->id,
+                    ]);
                 }
 
-                // 6. Clear shopping cart
+                // 7. Clear shopping cart
                 $this->cartService->clear();
 
-                // 7. Store security tokens in session
+                // 8. Store security tokens in session
                 session()->put('authorized_order_' . $order->order_number, $accessToken);
                 session()->put('authorized_order_id_' . $order->id, true);
                 session()->flash('last_order_id', $order->id);
                 session()->flash('last_order_number', $order->order_number);
+
+                // 9. Send Email Notifications (Non-blocking & Error-safe)
+                try {
+                    if (!empty($order->customer_email)) {
+                        Mail::to($order->customer_email)->send(new OrderCreatedCustomerMail($order));
+                    }
+
+                    $adminEmail = Setting::get('site_email', config('mail.from.address'));
+                    if (!empty($adminEmail)) {
+                        Mail::to($adminEmail)->send(new OrderCreatedAdminMail($order));
+                    }
+                } catch (\Throwable $mailEx) {
+                    Log::warning("Order email notification failed: " . $mailEx->getMessage(), [
+                        'order_id' => $order->id,
+                    ]);
+                }
 
                 return [
                     'success' => true,
