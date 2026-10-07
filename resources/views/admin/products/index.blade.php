@@ -7,11 +7,34 @@
 
     <div class="space-y-6">
         
+        <!-- Quick Campaign Tabs -->
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.products.index') }}" 
+               class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {{ !request('campaign') ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
+                Tüm Ürünler <span class="ml-1 opacity-80 font-normal">({{ $totalProductsCount }})</span>
+            </a>
+
+            <a href="{{ route('admin.products.index', array_merge(request()->query(), ['campaign' => 'discounted'])) }}" 
+               class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 {{ request('campaign') === 'discounted' ? 'bg-amber-500 text-white shadow-xs' : 'bg-white text-amber-800 border border-amber-200 hover:bg-amber-50' }}">
+                <span>🔥 Kampanyalı & İndirimli Ürünler</span>
+                <span class="px-1.5 py-0.5 rounded-md {{ request('campaign') === 'discounted' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900' }} text-[11px] font-extrabold">{{ $discountedCount }}</span>
+            </a>
+
+            <a href="{{ route('admin.products.index', array_merge(request()->query(), ['campaign' => 'featured'])) }}" 
+               class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 {{ request('campaign') === 'featured' ? 'bg-purple-600 text-white shadow-xs' : 'bg-white text-purple-800 border border-purple-200 hover:bg-purple-50' }}">
+                <span>⭐ Öne Çıkanlar (Vitrin)</span>
+            </a>
+        </div>
+
         <!-- Header Actions & Filters -->
         <div class="bg-white border border-[#E5E7EB] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
             
             <!-- Search & Filters Form -->
             <form method="GET" action="{{ route('admin.products.index') }}" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                @if(request('campaign'))
+                    <input type="hidden" name="campaign" value="{{ request('campaign') }}">
+                @endif
+
                 <div class="relative">
                     <input type="text" name="q" value="{{ request('q') }}" placeholder="Model veya SKU ara..." 
                            class="bg-white border border-[#D1D5DB] rounded-lg pl-8 pr-3 py-2 text-xs text-[#111827] placeholder-gray-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 w-44 sm:w-60">
@@ -37,7 +60,7 @@
                     <span>Filtrele</span>
                 </button>
 
-                @if(request()->hasAny(['q', 'category_id', 'brand_id']))
+                @if(request()->hasAny(['q', 'category_id', 'brand_id', 'campaign']))
                     <a href="{{ route('admin.products.index') }}" class="text-xs text-red-600 hover:underline font-medium">Temizle</a>
                 @endif
             </form>
@@ -58,7 +81,7 @@
                             <th class="py-3.5 px-4">Görsel</th>
                             <th class="py-3.5 px-4">Ürün Bilgisi</th>
                             <th class="py-3.5 px-4">Kategori & Marka</th>
-                            <th class="py-3.5 px-4">Fiyat</th>
+                            <th class="py-3.5 px-4">Fiyat / Kampanya</th>
                             <th class="py-3.5 px-4">Toplam Stok</th>
                             <th class="py-3.5 px-4">Durum</th>
                             <th class="py-3.5 px-4 text-right">İşlemler</th>
@@ -83,7 +106,7 @@
                                     </div>
                                     <div class="flex items-center space-x-1.5 mt-1">
                                         @if($prod->is_featured)
-                                            <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">Öne Çıkan</span>
+                                            <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">⭐ Öne Çıkan</span>
                                         @endif
                                         @if($prod->is_new)
                                             <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">Yeni</span>
@@ -97,11 +120,16 @@
                                     <span class="text-[11px] text-blue-600 font-medium">{{ $prod->brand?->name ?? 'YSA' }}</span>
                                 </td>
 
-                                <!-- Price -->
+                                <!-- Price & Campaign -->
                                 <td class="py-3 px-4">
                                     @if($prod->has_discount)
+                                        <div class="flex items-center space-x-1.5 mb-0.5">
+                                            <span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-extrabold">
+                                                -%{{ $prod->discount_percent }} İndirim
+                                            </span>
+                                        </div>
                                         <span class="line-through text-gray-400 text-[11px] block">{{ $prod->formatted_price }}</span>
-                                        <span class="font-extrabold text-red-600 text-sm">{{ $prod->formatted_effective_price }}</span>
+                                        <span class="font-extrabold text-rose-600 text-sm">{{ $prod->formatted_effective_price }}</span>
                                     @else
                                         <span class="font-bold text-[#111827] text-sm">{{ $prod->formatted_price }}</span>
                                     @endif

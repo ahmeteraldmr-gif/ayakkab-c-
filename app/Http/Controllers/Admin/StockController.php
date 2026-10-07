@@ -11,6 +11,7 @@ use App\Models\ProductSizeStock;
 use App\Models\Size;
 use App\Models\StockMovement;
 use App\Models\StockNotification;
+use App\Services\StockNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -101,6 +102,14 @@ class StockController extends Controller
                                 'reference_id' => (int) $productId,
                             ]);
 
+                            if ($qtyBefore === 0 && $newStock > 0) {
+                                $productObj = Product::find((int) $productId);
+                                $sizeObj = Size::find((int) $sizeId);
+                                if ($productObj && $sizeObj) {
+                                    StockNotificationService::notifySubscribers($productObj, $sizeObj, $newStock);
+                                }
+                            }
+
                             $updatedCount++;
                         }
                     }
@@ -159,6 +168,14 @@ class StockController extends Controller
                 'reference_type' => 'Product',
                 'reference_id' => $validated['product_id'],
             ]);
+
+            if ($qtyBefore === 0 && $newStock > 0) {
+                $productObj = Product::find($validated['product_id']);
+                $sizeObj = Size::find($validated['size_id']);
+                if ($productObj && $sizeObj) {
+                    StockNotificationService::notifySubscribers($productObj, $sizeObj, $newStock);
+                }
+            }
         }
 
         AuditLog::record(

@@ -78,8 +78,8 @@
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 30px 0 10px;">
-                <a href="{{ route('order.track.page') }}?order_number={{ $order->order_number }}&phone={{ urlencode($order->customer_phone) }}" 
-                   style="background: #2563eb; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+                <a href="{{ route('order.track.index') }}?order_number={{ $order->order_number }}&phone={{ urlencode($order->customer_phone) }}" 
+                    style="background: #2563eb; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
                     Siparişimi Takip Et
                 </a>
             </div>

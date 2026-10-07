@@ -143,6 +143,8 @@ class ShoeStoreTest extends TestCase
             'address' => 'Vişnezade Mah. Süleyman Seba Cad. No: 10',
             'order_notes' => 'Acil teslimat rica ederim.',
             'payment_method' => 'kapida_odeme',
+            'pre_info_approval' => '1',
+            'distance_selling_approval' => '1',
         ];
 
         $checkoutResponse = $this->withSession(['shopping_cart' => $cartData])
@@ -237,6 +239,8 @@ class ShoeStoreTest extends TestCase
             'district' => 'Çankaya',
             'address' => 'Atatürk Bulvarı No: 50',
             'payment_method' => 'kapida_odeme',
+            'pre_info_approval' => '1',
+            'distance_selling_approval' => '1',
         ];
 
         $response = $this->withSession(['shopping_cart' => $tamperedCart])

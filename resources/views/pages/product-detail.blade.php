@@ -194,11 +194,24 @@
                         </span>
                     </div>
 
-                    <!-- Title & Color -->
+                    <!-- Title & Rating & Color -->
                     <div>
                         <h1 class="font-display font-extrabold text-2xl sm:text-3xl text-dark leading-tight">
                             {{ $product->name }}
                         </h1>
+                        
+                        <!-- Review Rating Snippet -->
+                        <div class="flex items-center space-x-2 mt-2">
+                            <div class="flex items-center text-amber-400 text-xs">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="{{ $i <= round($product->average_rating) ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
+                                @endfor
+                            </div>
+                            <span class="text-xs font-bold text-dark">{{ $product->average_rating }}</span>
+                            <span class="text-xs text-black/40">({{ $product->approvedReviews->count() }} Değerlendirme)</span>
+                            <a href="#reviewsSection" class="text-xs text-accent font-semibold hover:underline ml-2">Yorumları Oku</a>
+                        </div>
+
                         @if($product->color)
                             <div class="flex items-center space-x-2 mt-2 text-xs text-black/60 font-semibold">
                                 <span>Renk:</span>
@@ -239,8 +252,29 @@
                         </div>
                     </div>
 
-                    <!-- Size Selection (NUMARA SEÇİMİ) -->
+                    <!-- Size Selection (NUMARA SEÇİMİ) & FIT INFO -->
                     <div>
+                        <!-- Beden / Kalıp Bilgisi Kutusu -->
+                        <div class="mb-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3.5 flex items-start space-x-3 text-xs text-amber-900">
+                            <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i class="fa-solid fa-arrows-left-right"></i>
+                            </div>
+                            <div class="space-y-0.5">
+                                <strong class="font-bold block text-dark">
+                                    @if($product->fit_type === 'dar_kalip')
+                                        Kalıp Bilgisi: Dar Kalıp (1 numara büyük tercih edebilirsiniz)
+                                    @elseif($product->fit_type === 'genis_kalip')
+                                        Kalıp Bilgisi: Geniş Kalıp (1 numara küçük tercih edebilirsiniz)
+                                    @else
+                                        Kalıp Bilgisi: Bu model tam kalıptır (Kendi numaranızı alabilirsiniz)
+                                    @endif
+                                </strong>
+                                @if($product->size_note)
+                                    <p class="text-black/70">{{ $product->size_note }}</p>
+                                @endif
+                            </div>
+                        </div>
+
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs font-extrabold uppercase tracking-wider text-dark flex items-center">
                                 <i class="fa-solid fa-shoe-prints text-accent mr-1.5"></i> Ayakkabı Numarası Seçiniz:
@@ -368,6 +402,134 @@
                     <span class="text-black/40 block font-medium">Orijinallik:</span>
                     <strong class="text-emerald-700 font-bold">%100 Orijinal</strong>
                 </div>
+            </div>
+        </div>
+
+        <!-- PRODUCT REVIEWS & RATINGS SECTION -->
+        <div id="reviewsSection" class="mt-12 bg-white rounded-3xl p-8 border border-black/5 shadow-sm space-y-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/5 pb-6">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-accent">Müşteri Deneyimleri</span>
+                    <h3 class="font-display font-extrabold text-2xl text-dark mt-1">Değerlendirmeler & Yorumlar</h3>
+                </div>
+                <button type="button" onclick="document.getElementById('writeReviewCard').classList.toggle('hidden')" class="px-5 py-2.5 bg-dark hover:bg-accent text-white hover:text-dark rounded-xl text-xs font-bold transition-colors shadow">
+                    <i class="fa-solid fa-pen-to-square mr-1.5"></i> Yorum Yaz
+                </button>
+            </div>
+
+            <!-- Rating Summary & Breakdown Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center bg-[#F7F7F5] p-6 rounded-2xl">
+                <!-- Big Score -->
+                <div class="text-center md:border-r border-black/10 md:pr-6 space-y-1">
+                    <div class="font-display font-black text-5xl text-dark">{{ $product->average_rating }}</div>
+                    <div class="flex items-center justify-center text-amber-400 text-sm">
+                        @for($i = 1; $i <= 5; $i++)
+                            <i class="{{ $i <= round($product->average_rating) ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
+                        @endfor
+                    </div>
+                    <p class="text-xs text-black/50">Toplam {{ $product->approvedReviews->count() }} yorum yapıldı</p>
+                </div>
+
+                <!-- Star Distribution Bars -->
+                <div class="md:col-span-2 space-y-2 text-xs">
+                    @php
+                        $breakdown = $product->rating_breakdown;
+                    @endphp
+                    @for($star = 5; $star >= 1; $star--)
+                        @php
+                            $cnt = $breakdown[$star]['count'] ?? 0;
+                            $pct = $breakdown[$star]['percent'] ?? 0;
+                        @endphp
+                        <div class="flex items-center space-x-3">
+                            <span class="w-12 text-black/60 font-medium text-right">{{ $star }} Yıldız</span>
+                            <div class="flex-grow h-2.5 bg-black/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-amber-400 rounded-full" style="width: {{ $pct }}%"></div>
+                            </div>
+                            <span class="w-8 text-black/40 text-[11px] font-mono">{{ $cnt }}</span>
+                        </div>
+                    @endfor
+                </div>
+            </div>
+
+            <!-- Write Review Form Container (Toggleable) -->
+            <div id="writeReviewCard" class="hidden bg-dark text-white p-6 sm:p-8 rounded-2xl space-y-5 border border-white/10">
+                <div class="border-b border-white/10 pb-4">
+                    <h4 class="font-display font-bold text-lg text-white">Ürünü Değerlendirin</h4>
+                    <p class="text-xs text-white/50">Deneyiminizi diğer müşterilerimizle paylaşın. Yorumunuz yönetici onayından sonra yayınlanacaktır.</p>
+                </div>
+
+                <form method="POST" action="{{ route('reviews.store', $product->id) }}" class="space-y-4">
+                    @csrf
+                    <!-- Star Rating Select -->
+                    <div>
+                        <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-2">Puanınız</label>
+                        <div class="flex items-center space-x-3 text-2xl text-amber-400 cursor-pointer" id="starPicker">
+                            <input type="hidden" name="rating" id="ratingInput" value="5" required>
+                            @for($s = 1; $s <= 5; $s++)
+                                <i class="fa-solid fa-star transition-transform hover:scale-125" onclick="setRating({{ $s }})" data-star="{{ $s }}"></i>
+                            @endfor
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="customer_name" class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-1.5">Adınız Soyadınız</label>
+                            <input type="text" name="customer_name" id="customer_name" required value="{{ auth()->user()->name ?? old('customer_name') }}" placeholder="Adınız Soyadınız" class="w-full bg-[#222] text-white text-xs px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:border-accent">
+                        </div>
+                        <div>
+                            <label for="title" class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-1.5">Başlık (İsteğe Bağlı)</label>
+                            <input type="text" name="title" id="title" placeholder="Örn: Çok rahat ve şık bir ayakkabı" class="w-full bg-[#222] text-white text-xs px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:border-accent">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="comment" class="block text-xs font-semibold text-white/80 uppercase tracking-wider mb-1.5">Yorumunuz</label>
+                        <textarea name="comment" id="comment" rows="3" required placeholder="Ayakkabının kalıbı, kalitesi ve duruşu hakkında görüşleriniz..." class="w-full bg-[#222] text-white text-xs p-4 rounded-xl border border-white/10 focus:outline-none focus:border-accent"></textarea>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-3 bg-accent hover:bg-accent-light text-dark font-bold text-xs rounded-xl transition-colors shadow">
+                            Yorumu Gönder
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Approved Customer Reviews List -->
+            <div class="space-y-4">
+                @if($product->approvedReviews->isEmpty())
+                    <p class="text-xs text-black/50 text-center py-6">Bu ürün için henüz onaylı bir yorum bulunmuyor. İlk yorumu siz yapın!</p>
+                @else
+                    <div class="divide-y divide-black/5">
+                        @foreach($product->approvedReviews as $rev)
+                            <div class="py-5 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-bold text-dark text-sm">{{ $rev->customer_name }}</span>
+                                        @if($rev->is_verified_purchase)
+                                            <span class="text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded border border-emerald-200 flex items-center">
+                                                <i class="fa-solid fa-circle-check mr-1"></i> Doğrulanmış Alışveriş
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <span class="text-[11px] text-black/40">{{ $rev->created_at->format('d.m.Y') }}</span>
+                                </div>
+
+                                <div class="flex items-center text-amber-400 text-xs">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="{{ $i <= $rev->rating ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
+                                    @endfor
+                                </div>
+
+                                @if($rev->title)
+                                    <h5 class="font-bold text-dark text-xs">{{ $rev->title }}</h5>
+                                @endif
+
+                                <p class="text-xs text-black/70 leading-relaxed">{{ $rev->comment }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -646,6 +808,22 @@
             btn.disabled = false;
             btn.innerHTML = origText;
             showToast('İşlem sırasında hata oluştu.', 'error');
+        });
+    }
+
+    // Star rating picker
+    function setRating(rating) {
+        document.getElementById('ratingInput').value = rating;
+        const stars = document.querySelectorAll('#starPicker i');
+        stars.forEach(star => {
+            const val = parseInt(star.getAttribute('data-star'));
+            if (val <= rating) {
+                star.classList.remove('fa-regular');
+                star.classList.add('fa-solid');
+            } else {
+                star.classList.remove('fa-solid');
+                star.classList.add('fa-regular');
+            }
         });
     }
 

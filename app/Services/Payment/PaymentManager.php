@@ -7,11 +7,22 @@ use Illuminate\Http\Request;
 
 class PaymentManager implements PaymentServiceInterface
 {
+    protected ?string $currentDriver = null;
+
     /**
-     * Get the default driver instance.
+     * Get the driver instance or set driver name.
      */
-    public function driver(?string $driver = null): self
+    public function driver(?string $driver = null): PaymentServiceInterface
     {
+        if ($driver === 'paytr') {
+            return app(PayTrPaymentService::class);
+        }
+
+        if ($driver === 'iyzico') {
+            return app(IyzicoPaymentService::class);
+        }
+
+        $this->currentDriver = $driver;
         return $this;
     }
 

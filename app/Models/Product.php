@@ -25,6 +25,8 @@ class Product extends Model
         'price',
         'discount_price',
         'gender',
+        'fit_type',
+        'size_note',
         'color',
         'color_code',
         'is_active',
@@ -93,6 +95,44 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class)->orderByDesc('created_at');
+    }
+
+    public function approvedReviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class)->where('is_approved', true)->orderByDesc('created_at');
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        return (float) round($this->approvedReviews()->avg('rating') ?? 5.0, 1);
+    }
+
+    public function getReviewsCountAttribute(): int
+    {
+        return (int) $this->approvedReviews()->count();
+    }
+
+    public function getRatingBreakdownAttribute(): array
+    {
+        $reviews = $this->approvedReviews()->get();
+        $total = $reviews->count();
+        $breakdown = [];
+
+        for ($i = 5; $i >= 1; $i--) {
+            $count = $reviews->where('rating', $i)->count();
+            $percent = $total > 0 ? round(($count / $total) * 100) : 0;
+            $breakdown[$i] = [
+                'count' => $count,
+                'percent' => $percent,
+            ];
+        }
+
+        return $breakdown;
     }
 
     // Scopes

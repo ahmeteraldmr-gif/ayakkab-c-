@@ -144,6 +144,21 @@
                     @endif
                 </a>
 
+                <a href="{{ route('admin.returns.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl font-medium transition-all {{ request()->routeIs('admin.returns.*') ? 'bg-[#2563EB] text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-[#1F2937] hover:text-white' }}">
+                    <i class="fa-solid fa-rotate-left w-5 text-center text-sm {{ request()->routeIs('admin.returns.*') ? 'text-white' : 'text-gray-400' }}"></i>
+                    <span class="text-[13px]">İade & Değişim</span>
+                </a>
+
+                <a href="{{ route('admin.reviews.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl font-medium transition-all {{ request()->routeIs('admin.reviews.*') ? 'bg-[#2563EB] text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-[#1F2937] hover:text-white' }}">
+                    <i class="fa-solid fa-star w-5 text-center text-sm {{ request()->routeIs('admin.reviews.*') ? 'text-white' : 'text-gray-400' }}"></i>
+                    <span class="text-[13px]">Yorumlar</span>
+                </a>
+
+                <a href="{{ route('admin.reports.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl font-medium transition-all {{ request()->routeIs('admin.reports.*') ? 'bg-[#2563EB] text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-[#1F2937] hover:text-white' }}">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-sm {{ request()->routeIs('admin.reports.*') ? 'text-white' : 'text-gray-400' }}"></i>
+                    <span class="text-[13px]">Raporlar</span>
+                </a>
+
                 <a href="{{ route('admin.coupons.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl font-medium transition-all {{ request()->routeIs('admin.coupons.*') ? 'bg-[#2563EB] text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-[#1F2937] hover:text-white' }}">
                     <i class="fa-solid fa-ticket w-5 text-center text-sm {{ request()->routeIs('admin.coupons.*') ? 'text-white' : 'text-gray-400' }}"></i>
                     <span class="text-[13px]">Kuponlar</span>
@@ -161,7 +176,7 @@
 
                 <a href="{{ route('admin.campaigns.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl font-medium transition-all {{ request()->routeIs('admin.campaigns.*') ? 'bg-[#2563EB] text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-[#1F2937] hover:text-white' }}">
                     <i class="fa-solid fa-bullhorn w-5 text-center text-sm {{ request()->routeIs('admin.campaigns.*') ? 'text-white' : 'text-gray-400' }}"></i>
-                    <span class="text-[13px]">Kampanyalar</span>
+                    <span class="text-[13px]">Banner & Vitrin</span>
                 </a>
 
                 <a href="{{ route('admin.messages.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl font-medium transition-all {{ request()->routeIs('admin.messages.*') ? 'bg-[#2563EB] text-white font-semibold shadow-sm' : 'text-gray-400 hover:bg-[#1F2937] hover:text-white' }}">

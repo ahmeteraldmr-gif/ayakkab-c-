@@ -12,6 +12,7 @@ use App\Models\ProductImage;
 use App\Models\ProductSizeStock;
 use App\Models\Size;
 use App\Models\StockMovement;
+use App\Services\StockNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,11 +55,22 @@ class ProductController extends Controller
             }
         }
 
+        if ($request->filled('campaign')) {
+            if ($request->input('campaign') === 'discounted') {
+                $query->whereNotNull('discount_price')->whereRaw('discount_price > 0 AND discount_price < price');
+            } elseif ($request->input('campaign') === 'featured') {
+                $query->where('is_featured', true);
+            }
+        }
+
         $products = $query->orderByDesc('id')->paginate(15)->withQueryString();
         $categories = Category::orderBy('name')->get();
         $brands = Brand::orderBy('name')->get();
 
-        return view('admin.products.index', compact('products', 'categories', 'brands'));
+        $discountedCount = Product::whereNotNull('discount_price')->whereRaw('discount_price > 0 AND discount_price < price')->count();
+        $totalProductsCount = Product::count();
+
+        return view('admin.products.index', compact('products', 'categories', 'brands', 'discountedCount', 'totalProductsCount'));
     }
 
     /**
@@ -88,6 +100,8 @@ class ProductController extends Controller
             'gender' => 'required|in:erkek,kadin,unisex,cocuk',
             'color' => 'nullable|string|max:50',
             'color_code' => 'nullable|string|max:20',
+            'fit_type' => 'nullable|in:dar_kalip,tam_kalip,genis_kalip',
+            'size_note' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'meta_title' => 'nullable|string|max:200',
@@ -126,6 +140,8 @@ class ProductController extends Controller
                 'gender' => $validated['gender'],
                 'color' => $validated['color'] ?? null,
                 'color_code' => $validated['color_code'] ?? null,
+                'fit_type' => $validated['fit_type'] ?? 'tam_kalip',
+                'size_note' => $validated['size_note'] ?? null,
                 'short_description' => $validated['short_description'] ?? null,
                 'description' => $validated['description'] ?? null,
                 'meta_title' => $validated['meta_title'] ?? $validated['name'],
@@ -249,6 +265,8 @@ class ProductController extends Controller
             'gender' => 'required|in:erkek,kadin,unisex,cocuk',
             'color' => 'nullable|string|max:50',
             'color_code' => 'nullable|string|max:20',
+            'fit_type' => 'nullable|in:dar_kalip,tam_kalip,genis_kalip',
+            'size_note' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'meta_title' => 'nullable|string|max:200',
@@ -274,6 +292,8 @@ class ProductController extends Controller
                 'gender' => $validated['gender'],
                 'color' => $validated['color'] ?? null,
                 'color_code' => $validated['color_code'] ?? null,
+                'fit_type' => $validated['fit_type'] ?? 'tam_kalip',
+                'size_note' => $validated['size_note'] ?? null,
                 'short_description' => $validated['short_description'] ?? null,
                 'description' => $validated['description'] ?? null,
                 'meta_title' => $validated['meta_title'] ?? $validated['name'],
@@ -324,6 +344,14 @@ class ProductController extends Controller
                             'reference_type' => 'Product',
                             'reference_id' => $product->id,
                         ]);
+
+                        // If stock became available (0 -> >0), notify subscribers
+                        if ($qtyBefore === 0 && $newStock > 0) {
+                            $sizeObj = Size::find((int) $sizeId);
+                            if ($sizeObj) {
+                                StockNotificationService::notifySubscribers($product, $sizeObj, $newStock);
+                            }
+                        }
                     }
                 }
             }

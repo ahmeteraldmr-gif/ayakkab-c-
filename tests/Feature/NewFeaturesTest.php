@@ -207,6 +207,8 @@ class NewFeaturesTest extends TestCase
             'district' => 'Konak',
             'address' => 'Alsancak Mah.',
             'payment_method' => 'kapida_odeme',
+            'pre_info_approval' => '1',
+            'distance_selling_approval' => '1',
         ]);
 
         $checkoutResponse->assertRedirect();

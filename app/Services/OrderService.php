@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\OrderCreatedAdminMail;
 use App\Mail\OrderCreatedCustomerMail;
 use App\Models\Coupon;
+use App\Models\CustomerAddress;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -146,6 +147,7 @@ class OrderService
                 $order = Order::create([
                     'order_number' => $orderNumber,
                     'access_token' => $accessToken,
+                    'user_id' => auth()->id(),
                     'customer_name' => $validatedData['customer_name'],
                     'customer_phone' => $validatedData['customer_phone'],
                     'customer_email' => $validatedData['customer_email'] ?? null,
@@ -162,6 +164,21 @@ class OrderService
                     'payment_method' => $validatedData['payment_method'],
                     'payment_status' => $validatedData['payment_method'] === 'kapida_odeme' ? 'kapida_odenecek' : 'beklemede',
                 ]);
+
+                // Save address to customer address book if requested and logged in
+                if (!empty($validatedData['save_address']) && auth()->check()) {
+                    CustomerAddress::firstOrCreate([
+                        'user_id' => auth()->id(),
+                        'address' => $validatedData['address'],
+                        'city' => $validatedData['city'],
+                        'district' => $validatedData['district'],
+                    ], [
+                        'title' => $validatedData['address_title'] ?? 'Sipariş Adresi',
+                        'full_name' => $validatedData['customer_name'],
+                        'phone' => $validatedData['customer_phone'],
+                        'is_default' => auth()->user()->addresses()->count() === 0,
+                    ]);
+                }
 
                 // 6. Create Order Items, Deduct Stock & Record Stock Movements
                 foreach ($orderItemsToCreate as $itemData) {

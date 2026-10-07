@@ -22,6 +22,15 @@
 
     <!-- Main Checkout Form Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        @if($errors->any())
+            <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl text-xs space-y-1">
+                @foreach($errors->all() as $error)
+                    <p><i class="fa-solid fa-circle-exclamation mr-1.5 text-rose-600"></i> {{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('checkout.process') }}">
             @csrf
             
@@ -30,6 +39,37 @@
                 <!-- LEFT: FORM FIELDS (lg:col-span-8) -->
                 <div class="lg:col-span-8 space-y-6">
                     
+                    <!-- Saved Addresses Quick Selection for Authenticated Users -->
+                    @auth
+                        @if(isset($savedAddresses) && $savedAddresses->isNotEmpty())
+                            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-black/5 shadow-sm space-y-4">
+                                <h3 class="font-display font-extrabold text-base text-dark border-b border-black/5 pb-3 flex items-center justify-between">
+                                    <span class="flex items-center">
+                                        <i class="fa-solid fa-location-dot text-accent mr-2"></i> Kayıtlı Adreslerimden Seç
+                                    </span>
+                                    <span class="text-xs text-black/50 font-normal">Hızlıca doldurmak için tıklayın</span>
+                                </h3>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    @foreach($savedAddresses as $sAddr)
+                                        <div onclick="populateAddress({{ json_encode($sAddr) }})" 
+                                             class="saved-addr-card p-4 rounded-2xl border border-black/10 bg-[#F7F7F5] hover:border-accent hover:bg-[#FBF7F0] cursor-pointer transition-all space-y-1 text-xs">
+                                            <div class="flex items-center justify-between">
+                                                <strong class="text-dark font-bold">{{ $sAddr->title }}</strong>
+                                                @if($sAddr->is_default)
+                                                    <span class="text-[9px] bg-accent/20 text-accent font-bold px-1.5 py-0.5 rounded">Varsayılan</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-black/70">{{ $sAddr->full_name }} • {{ $sAddr->phone }}</p>
+                                            <p class="text-black/60 truncate">{{ $sAddr->address }}</p>
+                                            <p class="text-dark font-semibold">{{ $sAddr->district }} / {{ $sAddr->city }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    @endauth
+
                     <!-- 1. Customer Personal Information -->
                     <div class="bg-white rounded-3xl p-6 sm:p-8 border border-black/5 shadow-sm space-y-5">
                         <h3 class="font-display font-extrabold text-base text-dark border-b border-black/5 pb-3 flex items-center">
@@ -40,20 +80,20 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-dark mb-1.5">Ad Soyad <span class="text-rose-500">*</span></label>
-                                <input type="text" name="customer_name" value="{{ old('customer_name') }}" required placeholder="Örn: Ahmet Yılmaz" 
+                                <input type="text" name="customer_name" id="customer_name" value="{{ old('customer_name', auth()->user()->name ?? '') }}" required placeholder="Örn: Ahmet Yılmaz" 
                                        class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-4 py-3 text-xs text-dark focus:outline-none focus:border-accent">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-dark mb-1.5">Telefon Numarası <span class="text-rose-500">*</span></label>
-                                <input type="tel" name="customer_phone" value="{{ old('customer_phone') }}" required placeholder="05XXXXXXXXX" 
+                                <input type="tel" name="customer_phone" id="customer_phone" value="{{ old('customer_phone', auth()->user()->phone ?? '') }}" required placeholder="05XXXXXXXXX" 
                                        class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-4 py-3 text-xs text-dark focus:outline-none focus:border-accent">
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-dark mb-1.5">E-posta Adresi (İsteğe Bağlı)</label>
-                            <input type="email" name="customer_email" value="{{ old('customer_email') }}" placeholder="ahmet@example.com (Sipariş takibi için)" 
+                            <input type="email" name="customer_email" id="customer_email" value="{{ old('customer_email', auth()->user()->email ?? '') }}" placeholder="ahmet@example.com (Sipariş takibi için)" 
                                    class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-4 py-3 text-xs text-dark focus:outline-none focus:border-accent">
                         </div>
                     </div>
@@ -68,22 +108,32 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-dark mb-1.5">İl <span class="text-rose-500">*</span></label>
-                                <input type="text" name="city" value="{{ old('city', 'İstanbul') }}" required placeholder="Örn: İstanbul" 
+                                <input type="text" name="city" id="city" value="{{ old('city', 'İstanbul') }}" required placeholder="Örn: İstanbul" 
                                        class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-4 py-3 text-xs text-dark focus:outline-none focus:border-accent">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-dark mb-1.5">İlçe <span class="text-rose-500">*</span></label>
-                                <input type="text" name="district" value="{{ old('district') }}" required placeholder="Örn: Kadıköy" 
+                                <input type="text" name="district" id="district" value="{{ old('district') }}" required placeholder="Örn: Kadıköy" 
                                        class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-4 py-3 text-xs text-dark focus:outline-none focus:border-accent">
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-dark mb-1.5">Açık Adres (Mahalle, Cadde, Sokak, No, Daire) <span class="text-rose-500">*</span></label>
-                            <textarea name="address" rows="3" required placeholder="Kargonun teslim edileceği detaylı adres..." 
+                            <textarea name="address" id="address" rows="3" required placeholder="Kargonun teslim edileceği detaylı adres..." 
                                       class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl p-4 text-xs text-dark focus:outline-none focus:border-accent">{{ old('address') }}</textarea>
                         </div>
+
+                        @auth
+                            <div class="pt-2 flex flex-col sm:flex-row sm:items-center gap-3">
+                                <label class="flex items-center space-x-2 text-xs text-dark cursor-pointer">
+                                    <input type="checkbox" name="save_address" value="1" class="rounded text-dark focus:ring-accent w-4 h-4">
+                                    <span>Bu adresi adres defterime kaydet</span>
+                                </label>
+                                <input type="text" name="address_title" placeholder="Adres Başlığı (Örn: Evim, Ofis)" class="px-3 py-1.5 bg-[#F7F7F5] border border-black/10 rounded-xl text-xs text-dark focus:outline-none focus:border-accent">
+                            </div>
+                        @endauth
 
                         <div>
                             <label class="block text-xs font-bold text-dark mb-1.5">Sipariş Notu (Opsiyonel)</label>
@@ -123,8 +173,8 @@
                                 <input type="radio" name="payment_method" value="online_kart" class="mt-1 text-dark focus:ring-accent w-4 h-4">
                                 <div class="ml-3 flex items-center justify-between w-full">
                                     <div>
-                                        <span class="block text-xs font-extrabold text-dark">Online Kredi Kartı ile Ödeme (Ön Provizyon)</span>
-                                        <span class="block text-[11px] text-black/60 mt-0.5">3D Secure ile güvenli ödeme altyapısı.</span>
+                                        <span class="block text-xs font-extrabold text-dark">Online Kredi Kartı ile Ödeme</span>
+                                        <span class="block text-[11px] text-black/60 mt-0.5">3D Secure ile güvenli ödeme altyapısı (PayTR / iyzico).</span>
                                     </div>
                                     <div class="flex items-center space-x-1.5 text-black/40 text-lg">
                                         <i class="fa-brands fa-cc-visa"></i>
@@ -209,15 +259,28 @@
                             </div>
                         @endif
 
+                        <!-- Mandatory Legal Agreements -->
+                        <div class="space-y-3 pt-4 border-t border-black/5 text-[11px] text-black/70">
+                            <label class="flex items-start space-x-2 cursor-pointer">
+                                <input type="checkbox" name="pre_info_approval" value="1" required class="mt-0.5 rounded text-dark focus:ring-accent w-4 h-4">
+                                <span>
+                                    <a href="{{ route('legal.pre-info') }}" target="_blank" class="text-dark font-bold underline hover:text-accent">Ön Bilgilendirme Formu</a>'nu okudum ve onaylıyorum. <span class="text-rose-500">*</span>
+                                </span>
+                            </label>
+
+                            <label class="flex items-start space-x-2 cursor-pointer">
+                                <input type="checkbox" name="distance_selling_approval" value="1" required class="mt-0.5 rounded text-dark focus:ring-accent w-4 h-4">
+                                <span>
+                                    <a href="{{ route('legal.distance-selling') }}" target="_blank" class="text-dark font-bold underline hover:text-accent">Mesafeli Satış Sözleşmesi</a>'ni okudum ve kabul ediyorum. <span class="text-rose-500">*</span>
+                                </span>
+                            </label>
+                        </div>
+
                         <!-- Submit Order Button -->
                         <button type="submit" id="checkoutSubmitBtn" class="w-full h-14 bg-dark hover:bg-accent text-white hover:text-dark font-display font-bold text-sm uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-black/10 flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-circle-check"></i>
                             <span>Siparişi Onayla</span>
                         </button>
-
-                        <p class="text-[10px] text-center text-black/40">
-                            "Siparişi Onayla" butonuna tıklayarak <a href="#" class="underline">Mesafeli Satış Sözleşmesi</a>'ni kabul etmiş olursunuz.
-                        </p>
                     </div>
                 </div>
 
@@ -229,6 +292,19 @@
 
 @push('scripts')
 <script>
+    function populateAddress(addr) {
+        if (addr.full_name) document.getElementById('customer_name').value = addr.full_name;
+        if (addr.phone) document.getElementById('customer_phone').value = addr.phone;
+        if (addr.city) document.getElementById('city').value = addr.city;
+        if (addr.district) document.getElementById('district').value = addr.district;
+        if (addr.address) document.getElementById('address').value = addr.address;
+        
+        document.querySelectorAll('.saved-addr-card').forEach(el => el.classList.remove('ring-2', 'ring-accent'));
+        event.currentTarget.classList.add('ring-2', 'ring-accent');
+        
+        showToast('Adres bilgileri aktarıldı.', 'success');
+    }
+
     function applyCheckoutCoupon() {
         const codeInput = document.getElementById('checkoutCouponCode');
         const code = codeInput ? codeInput.value.trim() : '';
@@ -256,14 +332,5 @@
         document.body.appendChild(form);
         form.submit();
     }
-
-    document.querySelector('form[action="{{ route('checkout.process') }}"]')?.addEventListener('submit', function(e) {
-        const btn = document.getElementById('checkoutSubmitBtn');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i><span>Siparişiniz Oluşturuluyor...</span>';
-            btn.classList.add('opacity-75', 'cursor-not-allowed');
-        }
-    });
 </script>
 @endpush

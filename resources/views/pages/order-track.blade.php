@@ -232,6 +232,25 @@
                             <span class="text-amber-400">{{ $order->formatted_total }}</span>
                         </div>
                     </div>
+
+                    <!-- WhatsApp Support Action Button -->
+                    @php
+                        $wpPhone = preg_replace('/[^0-9]/', '', \App\Models\Setting::get('site_whatsapp', '905321234567'));
+                        $wpMsg = urlencode("Merhaba, #" . $order->order_number . " numaralı siparişim hakkında bilgi almak istiyorum.");
+                        $wpUrl = "https://wa.me/{$wpPhone}?text={$wpMsg}";
+                    @endphp
+                    <div class="mt-8 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-emerald-950/20 p-4 rounded-2xl border border-emerald-900/40">
+                        <div class="text-xs space-y-0.5">
+                            <h4 class="font-bold text-white flex items-center">
+                                <i class="fa-brands fa-whatsapp text-emerald-400 mr-2 text-base"></i> Siparişinizle ilgili yardıma mı ihtiyacınız var?
+                            </h4>
+                            <p class="text-gray-400">Müşteri temsilcimize doğrudan WhatsApp üzerinden bağlanabilirsiniz.</p>
+                        </div>
+                        <a href="{{ $wpUrl }}" target="_blank" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center space-x-2 flex-shrink-0">
+                            <i class="fa-brands fa-whatsapp text-base"></i>
+                            <span>WhatsApp'tan Destek Al</span>
+                        </a>
+                    </div>
                 </div>
 
             </div>

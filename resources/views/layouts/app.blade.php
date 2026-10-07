@@ -228,19 +228,63 @@
                     </a>
                 </nav>
 
-                <!-- Header Actions (Search, Favorites, Cart, Mobile Toggle) -->
-                <div class="flex items-center space-x-1.5 sm:space-x-4">
+                <!-- Header Actions (Search, Favorites, User Account, Cart, Mobile Toggle) -->
+                <div class="flex items-center space-x-1.5 sm:space-x-3">
                     
-                    <!-- Search Icon / Trigger (Min 44px touch target) -->
+                    <!-- Search Icon / Trigger -->
                     <button type="button" onclick="toggleSearchModal(true)" class="w-10 h-10 flex items-center justify-center text-white/80 hover:text-accent transition-colors rounded-full hover:bg-white/5" title="Ürün Ara">
                         <i class="fa-solid fa-magnifying-glass text-base sm:text-lg"></i>
                     </button>
 
-                    <!-- Favorites Trigger (Min 44px touch target) -->
+                    <!-- Favorites Trigger -->
                     <button type="button" onclick="openFavoritesModal()" class="relative w-10 h-10 flex items-center justify-center text-white/80 hover:text-accent transition-colors rounded-full hover:bg-white/5" title="Favorilerim">
                         <i class="fa-regular fa-heart text-base sm:text-lg"></i>
                         <span id="headerFavBadge" class="absolute top-1 right-1 w-4 h-4 bg-accent text-dark text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
                     </button>
+
+                    <!-- User Account / Login Dropdown -->
+                    @auth
+                        <div class="relative group">
+                            <button type="button" class="w-10 h-10 flex items-center justify-center text-white/90 hover:text-accent transition-colors rounded-full hover:bg-white/5 border border-white/10" title="Hesabım">
+                                <i class="fa-solid fa-user-check text-sm text-accent"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-52 bg-[#161616] border border-white/10 rounded-xl shadow-2xl py-2 hidden group-hover:block transition-all duration-200 z-50">
+                                <div class="px-4 py-2 border-b border-white/10">
+                                    <p class="text-xs text-white/50">Giriş yapıldı</p>
+                                    <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</p>
+                                </div>
+                                <a href="{{ route('customer.dashboard') }}" class="flex items-center px-4 py-2.5 text-xs text-white/80 hover:bg-white/5 hover:text-accent transition-colors">
+                                    <i class="fa-solid fa-gauge w-4 mr-2.5 text-accent"></i> Hesap Özeti
+                                </a>
+                                <a href="{{ route('customer.orders') }}" class="flex items-center px-4 py-2.5 text-xs text-white/80 hover:bg-white/5 hover:text-accent transition-colors">
+                                    <i class="fa-solid fa-box-open w-4 mr-2.5 text-accent"></i> Siparişlerim
+                                </a>
+                                <a href="{{ route('customer.addresses') }}" class="flex items-center px-4 py-2.5 text-xs text-white/80 hover:bg-white/5 hover:text-accent transition-colors">
+                                    <i class="fa-solid fa-location-dot w-4 mr-2.5 text-accent"></i> Kayıtlı Adreslerim
+                                </a>
+                                <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-2.5 text-xs text-white/80 hover:bg-white/5 hover:text-accent transition-colors">
+                                    <i class="fa-solid fa-user-pen w-4 mr-2.5 text-accent"></i> Profil Bilgilerim
+                                </a>
+                                @if(auth()->user()->isAdmin())
+                                    <div class="border-t border-white/10 my-1"></div>
+                                    <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-xs text-amber-400 hover:bg-white/5 transition-colors">
+                                        <i class="fa-solid fa-shield-halved w-4 mr-2.5"></i> Admin Paneli
+                                    </a>
+                                @endif
+                                <div class="border-t border-white/10 my-1"></div>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center px-4 py-2 text-xs text-rose-400 hover:bg-white/5 transition-colors text-left">
+                                        <i class="fa-solid fa-arrow-right-from-bracket w-4 mr-2.5"></i> Çıkış Yap
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="w-10 h-10 flex items-center justify-center text-white/80 hover:text-accent transition-colors rounded-full hover:bg-white/5" title="Giriş Yap / Kayıt Ol">
+                            <i class="fa-regular fa-user text-base sm:text-lg"></i>
+                        </a>
+                    @endauth
 
                     <!-- Cart Trigger (Min 44px touch target) -->
                     <a href="{{ route('cart.index') }}" class="relative w-10 h-10 sm:w-11 sm:h-11 bg-accent/10 hover:bg-accent text-accent hover:text-dark transition-all duration-300 rounded-full flex items-center justify-center border border-accent/30" title="Sepetim">
@@ -322,6 +366,26 @@
                 <span class="flex items-center text-sm"><i class="fa-solid fa-envelope mr-3 text-accent w-5 text-center"></i> İletişim</span>
                 <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
             </a>
+
+            <div class="border-t border-white/10 my-2 pt-2">
+                @auth
+                    <a href="{{ route('customer.dashboard') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between px-4 py-3 rounded-xl bg-accent/10 text-accent font-semibold mb-1">
+                        <span class="flex items-center text-sm"><i class="fa-solid fa-user-circle mr-3 text-accent w-5 text-center"></i> {{ auth()->user()->name }} (Hesabım)</span>
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full flex items-center px-4 py-2.5 rounded-xl text-rose-400 hover:bg-white/5 text-sm text-left">
+                            <i class="fa-solid fa-arrow-right-from-bracket mr-3 text-rose-400 w-5 text-center"></i> Çıkış Yap
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between px-4 py-3 rounded-xl bg-accent/15 text-accent font-semibold">
+                        <span class="flex items-center text-sm"><i class="fa-solid fa-user-lock mr-3 text-accent w-5 text-center"></i> Müşteri Girişi / Kayıt Ol</span>
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </a>
+                @endauth
+            </div>
         </nav>
 
         <!-- Drawer Footer Contact & Actions -->
@@ -432,6 +496,21 @@
                                 </a>
                             </li>
                         @endforeach
+                    </ul>
+                </div>
+
+                <!-- Kurumsal & Yasal -->
+                <div class="space-y-4">
+                    <h4 class="font-display font-bold text-sm tracking-wider uppercase text-white border-b border-white/10 pb-2">
+                        Kurumsal & Yasal
+                    </h4>
+                    <ul class="space-y-2.5 text-sm text-white/70">
+                        <li><a href="{{ route('legal.kvkk') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-shield-halved text-[10px] mr-2 text-accent"></i> KVKK Aydınlatma</a></li>
+                        <li><a href="{{ route('legal.privacy') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-user-shield text-[10px] mr-2 text-accent"></i> Gizlilik Politikası</a></li>
+                        <li><a href="{{ route('legal.cookies') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-cookie text-[10px] mr-2 text-accent"></i> Çerez Politikası</a></li>
+                        <li><a href="{{ route('legal.distance-selling') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-file-contract text-[10px] mr-2 text-accent"></i> Mesafeli Satış</a></li>
+                        <li><a href="{{ route('legal.pre-info') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-circle-info text-[10px] mr-2 text-accent"></i> Ön Bilgilendirme</a></li>
+                        <li><a href="{{ route('legal.return-policy') }}" class="hover:text-accent transition-colors flex items-center"><i class="fa-solid fa-rotate-left text-[10px] mr-2 text-accent"></i> İade & Değişim</a></li>
                     </ul>
                 </div>
 

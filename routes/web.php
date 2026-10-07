@@ -9,16 +9,23 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MessageController as AdminMessageController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\ReturnRequestController as AdminReturnRequestController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\StockController as AdminStockController;
 use App\Http\Controllers\Admin\StockMovementController as AdminStockMovementController;
+use App\Http\Controllers\Auth\CustomerAuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\Customer\PortalController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegalPageController;
 use App\Http\Controllers\OrderTrackController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StockNotificationController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +61,9 @@ Route::post('/kupon/kaldir', [CouponController::class, 'remove'])->name('coupon.
 Route::post('/api/coupon/apply', [CouponController::class, 'apply'])->middleware('throttle:20,1')->name('api.coupon.apply');
 Route::post('/api/coupon/remove', [CouponController::class, 'remove'])->name('api.coupon.remove');
 
+// Product Review Submission
+Route::post('/urun/{product}/yorum-yap', [ProductReviewController::class, 'store'])->middleware('throttle:5,1')->name('reviews.store');
+
 // Stock Notification API (Stokta Yok - Haber Ver)
 Route::post('/stok-haber-ver', [StockNotificationController::class, 'store'])->middleware('throttle:10,1')->name('stock.notify');
 Route::post('/api/stock-notification', [StockNotificationController::class, 'store'])->middleware('throttle:10,1')->name('api.stock-notification');
@@ -66,6 +76,44 @@ Route::post('/siparis-takip', [OrderTrackController::class, 'track'])->middlewar
 Route::get('/odeme', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/odeme', [CheckoutController::class, 'process'])->middleware('throttle:10,1')->name('checkout.process');
 Route::get('/siparis-basarili/{orderNumber}', [CheckoutController::class, 'success'])->name('order.success');
+Route::any('/odeme/callback/{driver?}', [CheckoutController::class, 'paymentCallback'])->name('payment.callback');
+
+// Customer Auth Routes
+Route::middleware('guest')->group(function () {
+    Route::get('/giris-yap', [CustomerAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/giris-yap', [CustomerAuthController::class, 'login'])->middleware('throttle:5,1')->name('login.submit');
+    Route::get('/kayit-ol', [CustomerAuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/kayit-ol', [CustomerAuthController::class, 'register'])->middleware('throttle:5,1')->name('register.submit');
+    Route::get('/sifremi-unuttum', [CustomerAuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/sifremi-unuttum', [CustomerAuthController::class, 'sendResetLinkEmail'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/sifre-sifirla/{token}', [CustomerAuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/sifre-sifirla', [CustomerAuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.update');
+});
+Route::post('/cikis-yap', [CustomerAuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+// Customer Portal Routes
+Route::middleware('auth')->prefix('hesabim')->name('customer.')->group(function () {
+    Route::get('/', [PortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/siparislerim', [PortalController::class, 'orders'])->name('orders');
+    Route::get('/siparislerim/{orderNumber}', [PortalController::class, 'orderDetail'])->name('orders.show');
+    Route::get('/adreslerim', [PortalController::class, 'addresses'])->name('addresses');
+    Route::post('/adres-ekle', [PortalController::class, 'storeAddress'])->name('addresses.store');
+    Route::put('/adres-guncelle/{address}', [PortalController::class, 'updateAddress'])->name('addresses.update');
+    Route::delete('/adres-sil/{address}', [PortalController::class, 'destroyAddress'])->name('addresses.destroy');
+    Route::post('/adres-varsayilan/{address}', [PortalController::class, 'setDefaultAddress'])->name('addresses.set-default');
+    Route::get('/profilim', [PortalController::class, 'profile'])->name('profile');
+    Route::put('/profil-guncelle', [PortalController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/sifre-guncelle', [PortalController::class, 'updatePassword'])->name('password.update');
+    Route::post('/iade-talebi', [PortalController::class, 'submitReturnRequest'])->name('returns.store');
+});
+
+// Legal Pages
+Route::get('/kvkk-aydinlatma-metni', [LegalPageController::class, 'kvkk'])->name('legal.kvkk');
+Route::get('/gizlilik-politikasi', [LegalPageController::class, 'privacy'])->name('legal.privacy');
+Route::get('/cerez-politikasi', [LegalPageController::class, 'cookies'])->name('legal.cookies');
+Route::get('/mesafeli-satis-sozlesmesi', [LegalPageController::class, 'distanceSelling'])->name('legal.distance-selling');
+Route::get('/on-bilgilendirme-formu', [LegalPageController::class, 'preInfo'])->name('legal.pre-info');
+Route::get('/iade-ve-degisim-politikasi', [LegalPageController::class, 'returnPolicy'])->name('legal.return-policy');
 
 // Static Pages & Contact
 Route::get('/hakkimizda', [PageController::class, 'about'])->name('about');
@@ -105,6 +153,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::delete('orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
+
+    // Reviews Management
+    Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+    Route::post('reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
+    Route::post('reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('reviews.reject');
+    Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // Return & Exchange Requests
+    Route::get('returns', [AdminReturnRequestController::class, 'index'])->name('returns.index');
+    Route::get('returns/{returnRequest}', [AdminReturnRequestController::class, 'show'])->name('returns.show');
+    Route::post('returns/{returnRequest}/status', [AdminReturnRequestController::class, 'updateStatus'])->name('returns.update-status');
+
+    // Reports
+    Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export-csv', [AdminReportController::class, 'exportCsv'])->name('reports.export-csv');
 
     // Coupons Management
     Route::resource('coupons', AdminCouponController::class);
