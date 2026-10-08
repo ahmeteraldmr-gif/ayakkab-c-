@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Home Page
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::match(['get', 'post', 'head'], '/', [HomeController::class, 'index'])->name('home');
 
 // Products & Catalog
 Route::get('/urunler', [ProductController::class, 'index'])->name('products.index');
