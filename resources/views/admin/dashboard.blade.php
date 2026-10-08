@@ -185,7 +185,7 @@ Dashboard &amp; Mağaza Özeti
                                     <div class="flex items-center space-x-2 text-[11px] text-gray-500 mt-1">
                                         <span>Numara: <strong class="text-gray-900">{{ $lItem->size?->size_number }}</strong></span>
                                         <span>•</span>
-                                        <span class="text-blue-600 font-medium">{{ $lItem->product->brand?->name ?? 'YSA' }}</span>
+                                        <span class="text-blue-600 font-medium">{{ $lItem->product->brand?->name ?? 'VELORA' }}</span>
                                     </div>
                                 </div>
 

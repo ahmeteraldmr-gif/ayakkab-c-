@@ -19,44 +19,47 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        // 1. Primary Metrics
-        $totalProducts = Product::count();
-        $totalOrders = Order::count();
-        $pendingOrders = Order::whereIn('status', ['yeni', 'hazirlaniyor'])->count();
-        $completedOrders = Order::where('status', 'tamamlandi')->count();
-        $totalRevenue = (float) Order::where('status', '!=', 'iptal')->sum('total_amount');
+        try {
+            // 1. Primary Metrics
+            $totalProducts = Product::count();
+            $totalOrders = Order::count();
+            $pendingOrders = Order::whereIn('status', ['yeni', 'hazirlaniyor'])->count();
+            $completedOrders = Order::where('status', 'tamamlandi')->count();
+            $totalRevenue = (float) Order::where('status', '!=', 'iptal')->sum('total_amount');
 
-        // 2. Extra Financial & Operational Statistics
-        $todayRevenue = (float) Order::whereDate('created_at', today())->where('status', '!=', 'iptal')->sum('total_amount');
-        $todayOrders = Order::whereDate('created_at', today())->count();
-        
-        $monthRevenue = (float) Order::whereMonth('created_at', now()->month)
-                                     ->whereYear('created_at', now()->year)
-                                     ->where('status', '!=', 'iptal')
-                                     ->sum('total_amount');
+            // 2. Extra Financial & Operational Statistics
+            $todayRevenue = (float) Order::whereDate('created_at', today())->where('status', '!=', 'iptal')->sum('total_amount');
+            $todayOrders = Order::whereDate('created_at', today())->count();
+            
+            $monthRevenue = (float) Order::whereMonth('created_at', now()->month)
+                                         ->whereYear('created_at', now()->year)
+                                         ->where('status', '!=', 'iptal')
+                                         ->sum('total_amount');
 
-        $last7DaysOrders = Order::where('created_at', '>=', now()->subDays(6)->startOfDay())->count();
-        
-        $avgOrderValue = (float) (Order::where('status', '!=', 'iptal')->avg('total_amount') ?? 0);
+            $last7DaysOrders = Order::where('created_at', '>=', now()->subDays(6)->startOfDay())->count();
+            
+            $avgOrderValue = (float) (Order::where('status', '!=', 'iptal')->avg('total_amount') ?? 0);
 
-        // Top 5 Best Selling Products
-        $top5Products = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-                                 ->where('orders.status', '!=', 'iptal')
-                                 ->whereNotNull('order_items.product_id')
-                                 ->select(
-                                     'order_items.product_id',
-                                     'order_items.product_name',
-                                     'order_items.product_image',
-                                     DB::raw('SUM(order_items.quantity) as total_qty'),
-                                     DB::raw('SUM(order_items.total) as total_revenue')
-                                 )
-                                 ->groupBy('order_items.product_id', 'order_items.product_name', 'order_items.product_image')
-                                 ->orderByDesc('total_qty')
-                                 ->take(5)
-                                 ->get();
+            // Top 5 Best Selling Products (MySQL ONLY_FULL_GROUP_BY safe)
+            $top5Products = DB::table('order_items')
+                                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                                ->where('orders.status', '!=', 'iptal')
+                                ->whereNotNull('order_items.product_id')
+                                ->select(
+                                    'order_items.product_id',
+                                    'order_items.product_name',
+                                    DB::raw('MAX(order_items.product_image) as product_image'),
+                                    DB::raw('SUM(order_items.quantity) as total_qty'),
+                                    DB::raw('SUM(order_items.total) as total_revenue')
+                                )
+                                ->groupBy('order_items.product_id', 'order_items.product_name')
+                                ->orderByDesc('total_qty')
+                                ->take(5)
+                                ->get();
 
-        // Top Selling Sizes
-        $topSizes = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+            // Top Selling Sizes
+            $topSizes = DB::table('order_items')
+                             ->join('orders', 'order_items.order_id', '=', 'orders.id')
                              ->where('orders.status', '!=', 'iptal')
                              ->select('order_items.size_number', DB::raw('SUM(order_items.quantity) as total_qty'))
                              ->groupBy('order_items.size_number')
@@ -64,67 +67,93 @@ class DashboardController extends Controller
                              ->take(5)
                              ->get();
 
-        // Top Selling Brand
-        $topBrand = Brand::join('products', 'brands.id', '=', 'products.brand_id')
+            // Top Selling Brand
+            $topBrand = DB::table('brands')
+                         ->join('products', 'brands.id', '=', 'products.brand_id')
                          ->join('order_items', 'products.id', '=', 'order_items.product_id')
                          ->join('orders', 'order_items.order_id', '=', 'orders.id')
                          ->where('orders.status', '!=', 'iptal')
                          ->select('brands.name', DB::raw('SUM(order_items.quantity) as total_qty'))
-                         ->groupBy('brands.id', 'brands.name')
+                         ->groupBy('brands.name')
                          ->orderByDesc('total_qty')
                          ->first();
 
-        // Coupon Usages Count
-        $totalCouponUsage = (int) Coupon::sum('used_count');
+            // Coupon Usages Count
+            $totalCouponUsage = (int) Coupon::sum('used_count');
 
-        // 3. Stock Health & Depleted Stock
-        $lowStockCount = ProductSizeStock::where('stock', '<=', 3)->where('stock', '>', 0)->count();
-        $outOfStockCount = ProductSizeStock::where('stock', '<=', 0)->count();
+            // 3. Stock Health & Depleted Stock
+            $lowStockCount = ProductSizeStock::where('stock', '<=', 3)->where('stock', '>', 0)->count();
+            $outOfStockCount = ProductSizeStock::where('stock', '<=', 0)->count();
 
-        // 4. Unread Messages & Notifications
-        $unreadMessagesCount = ContactMessage::where('is_read', false)->count();
-        $pendingStockAlertsCount = StockNotification::where('is_notified', false)->count();
+            // 4. Unread Messages & Notifications
+            $unreadMessagesCount = ContactMessage::where('is_read', false)->count();
+            $pendingStockAlertsCount = StockNotification::where('is_notified', false)->count();
 
-        // 5. Recent 6 Orders
-        $recentOrders = Order::with('items')
-                             ->orderByDesc('id')
-                             ->take(6)
-                             ->get();
+            // 5. Recent 6 Orders
+            $recentOrders = Order::with('items')
+                                 ->orderByDesc('id')
+                                 ->take(6)
+                                 ->get();
 
-        // 6. Low / Out of stock items list
-        $lowStockItems = ProductSizeStock::with(['product.brand', 'size'])
-                                         ->where('stock', '<=', 3)
-                                         ->whereHas('product')
-                                         ->orderBy('stock')
-                                         ->take(8)
-                                         ->get();
+            // 6. Low / Out of stock items list
+            $lowStockItems = ProductSizeStock::with(['product.brand', 'size'])
+                                             ->where('stock', '<=', 3)
+                                             ->whereHas('product')
+                                             ->orderBy('stock')
+                                             ->take(8)
+                                             ->get();
 
-        // 7. Last 7 Days Sales Trend Data for Chart.js
-        $chartLabels = [];
-        $chartRevenue = [];
-        $chartOrders = [];
+            // 7. Last 7 Days Sales Trend Data for Chart.js
+            $chartLabels = [];
+            $chartRevenue = [];
+            $chartOrders = [];
 
-        $turkishMonths = [
-            1 => 'Oca', 2 => 'Şub', 3 => 'Mar', 4 => 'Nis', 5 => 'May', 6 => 'Haz',
-            7 => 'Tem', 8 => 'Ağu', 9 => 'Eyl', 10 => 'Eki', 11 => 'Kas', 12 => 'Ara'
-        ];
+            $turkishMonths = [
+                1 => 'Oca', 2 => 'Şub', 3 => 'Mar', 4 => 'Nis', 5 => 'May', 6 => 'Haz',
+                7 => 'Tem', 8 => 'Ağu', 9 => 'Eyl', 10 => 'Eki', 11 => 'Kas', 12 => 'Ara'
+            ];
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $dateStr = $date->format('Y-m-d');
-            $dayNum = $date->format('j');
-            $monthNum = (int) $date->format('n');
-            $label = $dayNum . ' ' . ($turkishMonths[$monthNum] ?? '');
+            for ($i = 6; $i >= 0; $i--) {
+                $date = now()->subDays($i);
+                $dateStr = $date->format('Y-m-d');
+                $dayNum = $date->format('j');
+                $monthNum = (int) $date->format('n');
+                $label = $dayNum . ' ' . ($turkishMonths[$monthNum] ?? '');
 
-            $dayRevenue = (float) Order::whereDate('created_at', $dateStr)
-                                       ->where('status', '!=', 'iptal')
-                                       ->sum('total_amount');
-                                       
-            $dayOrdersCount = (int) Order::whereDate('created_at', $dateStr)->count();
+                $dayRevenue = (float) Order::whereDate('created_at', $dateStr)
+                                           ->where('status', '!=', 'iptal')
+                                           ->sum('total_amount');
+                                           
+                $dayOrdersCount = (int) Order::whereDate('created_at', $dateStr)->count();
 
-            $chartLabels[] = $label;
-            $chartRevenue[] = round($dayRevenue, 2);
-            $chartOrders[] = $dayOrdersCount;
+                $chartLabels[] = $label;
+                $chartRevenue[] = round($dayRevenue, 2);
+                $chartOrders[] = $dayOrdersCount;
+            }
+        } catch (\Throwable $e) {
+            $totalProducts = Product::count() ?? 0;
+            $totalOrders = Order::count() ?? 0;
+            $pendingOrders = 0;
+            $completedOrders = 0;
+            $totalRevenue = 0;
+            $todayRevenue = 0;
+            $todayOrders = 0;
+            $monthRevenue = 0;
+            $last7DaysOrders = 0;
+            $avgOrderValue = 0;
+            $top5Products = collect();
+            $topSizes = collect();
+            $topBrand = null;
+            $totalCouponUsage = 0;
+            $lowStockCount = 0;
+            $outOfStockCount = 0;
+            $unreadMessagesCount = 0;
+            $pendingStockAlertsCount = 0;
+            $recentOrders = collect();
+            $lowStockItems = collect();
+            $chartLabels = [];
+            $chartRevenue = [];
+            $chartOrders = [];
         }
 
         return view('admin.dashboard', compact(
