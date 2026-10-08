@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Markayı Düzenle | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Markayı Düzenle | VELORA Yönetim Paneli')
 @section('page_title')
     Markayı Düzenle: {{ $brand->name }}
 @endsection

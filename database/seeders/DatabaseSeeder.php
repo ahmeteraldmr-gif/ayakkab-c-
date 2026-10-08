@@ -27,9 +27,9 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Create Admin User
         $admin = User::firstOrCreate(
-            ['email' => 'admin@yusufakboga.com'],
+            ['email' => 'admin@velora.com'],
             [
-                'name' => 'Yusuf Akboğa',
+                'name' => 'VELORA Admin',
                 'password' => Hash::make('admin123'),
                 'is_admin' => true,
                 'phone' => '+90 532 123 45 67',
@@ -49,17 +49,17 @@ class DatabaseSeeder extends Seeder
 
         // 2. Default Settings
         $defaultSettings = [
-            'site_name' => 'Yusuf Akboğa Ayakkabı',
-            'site_title' => 'Yusuf Akboğa Ayakkabı | Premium & Modern Sneaker Koleksiyonu',
-            'site_description' => 'Yusuf Akboğa kalitesiyle en yeni ve tarz ayakkabı modellerini keşfedin. Orijinal sneaker, klasik ve günlük ayakkabılar.',
+            'site_name' => 'VELORA',
+            'site_title' => 'VELORA | Tarzın Adımlarında',
+            'site_description' => 'VELORA kalitesiyle en yeni ve tarz lüks ayakkabı modellerini keşfedin. Orijinal sneaker, klasik ve günlük ayakkabılar.',
             'site_phone' => '+90 (216) 450 10 20',
             'site_whatsapp' => '905321234567',
-            'site_instagram' => 'https://instagram.com/yusufakboga_ayakkabi',
-            'site_email' => 'info@yusufakboga.com',
+            'site_instagram' => 'https://instagram.com/velora_official',
+            'site_email' => 'info@velora.com',
             'site_address' => 'Bağdat Caddesi No: 184/A Kadıköy / İstanbul',
             'site_hours' => 'Pazartesi - Cumartesi: 09:30 - 20:30 | Pazar: 11:00 - 19:00',
-            'about_mini' => 'Yusuf Akboğa Ayakkabı, adımlarınıza prestij ve konfor katmak amacıyla kurulmuş seçkin bir ayakkabı mağazasıdır. En trend sneaker modellerinden el işçiliği klasik tasarımlara kadar en seçkin koleksiyonları müşterilerimizle buluşturuyoruz.',
-            'about_full' => '2016 yılında Yusuf Akboğa tarafından kurulan mağazamız, ayakkabı sektöründe kalite ve estetiği bir araya getirme vizyonuyla yola çıkmıştır. Müşteri memnuniyetini en üst düzeyde tutarak, dünya standartlarında orijinal markaları ve özel tasarım ayakkabıları sunmaktayız.',
+            'about_mini' => 'VELORA, adımlarınıza prestij, estetik ve konfor katmak amacıyla kurulmuş seçkin ve modern bir ayakkabı markasıdır. En trend sneaker modellerinden el işçiliği klasik tasarımlara kadar en seçkin koleksiyonları müşterilerimizle buluşturuyoruz.',
+            'about_full' => 'VELORA, ayakkabı sektöründe kalite, zarafet ve estetiği bir araya getirme vizyonuyla yola çıkmıştır. Müşteri memnuniyetini en üst düzeyde tutarak, dünya standartlarında orijinal modelleri ve seçkin koleksiyonları sunmaktayız.',
             'free_shipping_threshold' => '1500',
             'shipping_cost' => '89.90',
             'facebook_url' => 'https://facebook.com',
@@ -133,7 +133,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Adidas', 'slug' => 'adidas', 'description' => 'Konfor ve sokak stilinin ikonik buluşması'],
             ['name' => 'Puma', 'slug' => 'puma', 'description' => 'Hızlı, dinamik ve enerjik sneaker modelleri'],
             ['name' => 'New Balance', 'slug' => 'new-balance', 'description' => 'Efsanevi retro tasarım ve ergonomi'],
-            ['name' => 'YSA Signature', 'slug' => 'ysa-signature', 'description' => 'Yusuf Akboğa özel üretim hakiki deri koleksiyonu'],
+            ['name' => 'VELORA Signature', 'slug' => 'velora-signature', 'description' => 'VELORA özel üretim hakiki deri ve lüks sneaker koleksiyonu'],
         ];
 
         $brands = [];
@@ -263,8 +263,8 @@ class DatabaseSeeder extends Seeder
                 'is_featured' => true,
                 'is_new' => false,
                 'view_count' => 115,
-                'short_description' => 'Yusuf Akboğa atölyesinde el işçiliğiyle üretilmiş %100 dana derisi klasik ayakkabı.',
-                'description' => 'İş görüşmeleri, resmi davetler ve şık takım elbiseler için özel olarak tasarlanan YSA Signature Oxford modeli, nefes alan iç astarı ve özel kösele tabanı ile zarafetin doruk noktasıdır.',
+                'short_description' => 'VELORA atölyesinde el işçiliğiyle üretilmiş %100 dana derisi lüks klasik ayakkabı.',
+                'description' => 'İş görüşmeleri, resmi davetler ve şık takım elbiseler için özel olarak tasarlanan VELORA Signature Oxford modeli, nefes alan iç astarı ve özel kösele tabanı ile zarafetin doruk noktasıdır.',
                 'images' => [
                     'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=1000&auto=format&fit=crop&q=80',
                     'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=1000&auto=format&fit=crop&q=80',
@@ -415,7 +415,7 @@ class DatabaseSeeder extends Seeder
                 'is_new' => $pData['is_new'],
                 'view_count' => $pData['view_count'],
                 'is_active' => true,
-                'meta_title' => $pData['name'] . ' | Yusuf Akboğa',
+                'meta_title' => $pData['name'] . ' | VELORA',
                 'meta_description' => $pData['short_description'],
             ]);
 
@@ -457,7 +457,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'title' => 'Sneaker & Sokak Kültürü',
-                'subtitle' => 'Nike, Adidas ve New Balance en çok aranan modelleri Yusuf Akboğa güvencesiyle vitrinde.',
+                'subtitle' => 'Nike, Adidas ve New Balance en çok aranan modelleri VELORA güvencesiyle vitrinde.',
                 'badge' => 'Öne Çıkanlar',
                 'discount_text' => 'Ücretsiz Kargo',
                 'button_text' => 'Koleksiyonu İncele',

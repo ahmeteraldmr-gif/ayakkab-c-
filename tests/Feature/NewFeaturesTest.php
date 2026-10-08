@@ -78,7 +78,7 @@ class NewFeaturesTest extends TestCase
     public function test_coupon_percentage_and_fixed_discount_calculations()
     {
         $percentCoupon = Coupon::create([
-            'code' => 'YUSUF10',
+            'code' => 'VELORA10',
             'type' => 'percentage',
             'value' => 10,
             'minimum_order_amount' => 500,

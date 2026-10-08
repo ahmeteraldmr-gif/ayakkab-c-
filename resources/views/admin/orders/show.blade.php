@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Sipariş Detayı #' . $order->order_number . ' | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Sipariş Detayı #' . $order->order_number . ' | VELORA Yönetim Paneli')
 @section('page_title', 'Sipariş Detayı: ' . $order->order_number)
 
 @section('content')
@@ -21,7 +21,7 @@
                     $cleanPhone = '9' . $cleanPhone;
                 }
             @endphp
-            <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode('Merhaba ' . $order->customer_name . ', Yusuf Akboğa Ayakkabı\'dan ' . $order->order_number . ' numaralı siparişiniz hakkında yazıyoruz.') }}" 
+            <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode('Merhaba ' . $order->customer_name . ', VELORA\'dan ' . $order->order_number . ' numaralı siparişiniz hakkında yazıyoruz.') }}" 
                target="_blank" 
                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center space-x-2 shadow-xs">
                 <i class="fa-brands fa-whatsapp text-sm"></i>

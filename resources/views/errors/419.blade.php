@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', '419 - Oturum Süresi Doldu | Yusuf Akboğa Ayakkabı')
+@section('title', '419 - Oturum Süresi Doldu | VELORA')
 
 @section('content')
 <div class="min-h-[60vh] flex items-center justify-center py-16 px-4">

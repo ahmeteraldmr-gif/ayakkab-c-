@@ -4,27 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', \App\Models\Setting::get('site_title', 'Yusuf Akboğa Ayakkabı | Modern & Premium Ayakkabı Mağazası'))</title>
-    <meta name="description" content="@yield('meta_description', \App\Models\Setting::get('site_description', 'Yusuf Akboğa kalitesiyle en yeni ve tarz ayakkabı modellerini keşfedin.'))">
+    <title>@yield('title', \App\Models\Setting::get('site_title', 'VELORA | Tarzın Adımlarında'))</title>
+    <meta name="description" content="@yield('meta_description', \App\Models\Setting::get('site_description', 'VELORA kalitesiyle en yeni ve tarz lüks ayakkabı modellerini keşfedin.'))">
     <link rel="canonical" href="@yield('canonical', url()->current())">
     <meta name="theme-color" content="#111111">
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="@yield('title', \App\Models\Setting::get('site_title', 'Yusuf Akboğa Ayakkabı'))">
-    <meta property="og:description" content="@yield('meta_description', \App\Models\Setting::get('site_description', 'En yeni ve tarz ayakkabı modelleri.'))">
-    <meta property="og:image" content="@yield('og_image', asset('favicon.ico'))">
+    <meta property="og:title" content="@yield('title', \App\Models\Setting::get('site_title', 'VELORA | Tarzın Adımlarında'))">
+    <meta property="og:description" content="@yield('meta_description', \App\Models\Setting::get('site_description', 'VELORA kalitesiyle en yeni ve tarz lüks ayakkabı modellerini keşfedin.'))">
+    <meta property="og:image" content="@yield('og_image', asset('favicon.svg'))">
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('title', \App\Models\Setting::get('site_title', 'Yusuf Akboğa Ayakkabı'))">
-    <meta name="twitter:description" content="@yield('meta_description', \App\Models\Setting::get('site_description', 'En yeni ve tarz ayakkabı modelleri.'))">
-    <meta name="twitter:image" content="@yield('og_image', asset('favicon.ico'))">
+    <meta name="twitter:title" content="@yield('title', \App\Models\Setting::get('site_title', 'VELORA | Tarzın Adımlarında'))">
+    <meta name="twitter:description" content="@yield('meta_description', \App\Models\Setting::get('site_description', 'VELORA kalitesiyle en yeni ve tarz lüks ayakkabı modellerini keşfedin.'))">
+    <meta name="twitter:image" content="@yield('og_image', asset('favicon.svg'))">
 
     <!-- Favicon & Touch Icons -->
-    <link rel="icon" type="image/x-icon" href="{{ \App\Models\Setting::get('site_favicon', '/favicon.ico') }}">
-    <link rel="apple-touch-icon" href="{{ \App\Models\Setting::get('site_favicon', '/favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ \App\Models\Setting::get('site_favicon', asset('favicon.svg')) }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
     
     <!-- Google Fonts (Montserrat for headings, Inter & Manrope for body and UI) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -194,13 +195,16 @@
             <div class="flex items-center justify-between h-16 sm:h-20">
                 
                 <!-- Logo -->
-                <a href="{{ route('home') }}" class="flex flex-col group py-1">
-                    <span class="font-display font-extrabold text-lg sm:text-2xl tracking-tight text-white group-hover:text-accent transition-colors">
-                        YUSUF AKBOĞA
-                    </span>
-                    <span class="text-[9px] sm:text-[11px] tracking-[0.2em] font-semibold text-accent uppercase -mt-0.5 sm:mt-0">
-                        Ayakkabı / Footwear
-                    </span>
+                <a href="{{ route('home') }}" class="flex items-center space-x-3 group py-1">
+                    <img src="{{ asset('images/velora-symbol.svg') }}" alt="VELORA Logo" class="h-9 w-9 sm:h-10 sm:w-10 filter invert brightness-200 group-hover:scale-105 transition-transform">
+                    <div class="flex flex-col">
+                        <span class="font-display font-extrabold text-xl sm:text-2xl tracking-[0.18em] text-white group-hover:text-accent transition-colors">
+                            VELORA
+                        </span>
+                        <span class="text-[8.5px] sm:text-[9.5px] tracking-[0.25em] font-semibold text-accent uppercase -mt-0.5">
+                            Tarzın Adımlarında
+                        </span>
+                    </div>
                 </a>
 
                 <!-- Desktop Navigation Menu -->
@@ -311,9 +315,12 @@
         
         <!-- Drawer Header -->
         <div class="p-5 border-b border-white/10 flex items-center justify-between">
-            <div class="flex flex-col">
-                <span class="font-display font-bold text-lg tracking-tight text-white">YUSUF AKBOĞA</span>
-                <span class="text-[10px] tracking-[0.2em] font-semibold text-accent uppercase">Ayakkabı / Menü</span>
+            <div class="flex items-center space-x-2.5">
+                <img src="{{ asset('images/velora-symbol.svg') }}" alt="VELORA Logo" class="h-8 w-8 filter invert brightness-200">
+                <div class="flex flex-col">
+                    <span class="font-display font-bold text-lg tracking-[0.15em] text-white">VELORA</span>
+                    <span class="text-[9px] tracking-[0.22em] font-semibold text-accent uppercase">Tarzın Adımlarında</span>
+                </div>
             </div>
             <button type="button" onclick="toggleMobileMenu(false)" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 hover:text-white flex items-center justify-center transition-colors" aria-label="Menüyü Kapat">
                 <i class="fa-solid fa-xmark text-lg"></i>
@@ -444,18 +451,21 @@
                 
                 <!-- Brand Info -->
                 <div class="lg:col-span-2 space-y-4">
-                    <a href="{{ route('home') }}" class="flex flex-col">
-                        <span class="font-display font-bold text-2xl tracking-tight text-white">YUSUF AKBOĞA</span>
-                        <span class="text-[11px] tracking-[0.25em] font-semibold text-accent uppercase">Ayakkabı / Footwear</span>
+                    <a href="{{ route('home') }}" class="flex items-center space-x-3 group">
+                        <img src="{{ asset('images/velora-symbol.svg') }}" alt="VELORA Logo" class="h-10 w-10 filter invert brightness-200">
+                        <div class="flex flex-col">
+                            <span class="font-display font-bold text-2xl tracking-[0.18em] text-white group-hover:text-accent transition-colors">VELORA</span>
+                            <span class="text-[10px] tracking-[0.25em] font-semibold text-accent uppercase">Tarzın Adımlarında</span>
+                        </div>
                     </a>
                     <p class="text-accent font-medium text-sm italic">
-                        “Herkes yürür, tarzını sen belirlersin.”
+                        “Tarzın Adımlarında — Lüks ve Konforun Buluştuğu Nokta.”
                     </p>
                     <p class="text-white/60 text-sm leading-relaxed max-w-sm">
-                        {{ \App\Models\Setting::get('about_mini', 'Yusuf Akboğa Ayakkabı, adımlarınıza prestij ve konfor katmak amacıyla kurulmuş seçkin bir ayakkabı mağazasıdır.') }}
+                        {{ \App\Models\Setting::get('about_mini', 'VELORA, adımlarınıza prestij, estetik ve konfor katmak amacıyla kurulmuş seçkin ve modern bir ayakkabı markasıdır.') }}
                     </p>
                     <div class="flex items-center space-x-3 pt-2">
-                        <a href="{{ \App\Models\Setting::get('site_instagram', 'https://instagram.com') }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-accent hover:text-dark text-white/80 transition-all flex items-center justify-center border border-white/10">
+                        <a href="{{ \App\Models\Setting::get('site_instagram', 'https://instagram.com/velora_official') }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-accent hover:text-dark text-white/80 transition-all flex items-center justify-center border border-white/10">
                             <i class="fa-brands fa-instagram text-base"></i>
                         </a>
                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', \App\Models\Setting::get('site_whatsapp', '905321234567')) }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-white text-white/80 transition-all flex items-center justify-center border border-white/10">
@@ -530,7 +540,7 @@
                         </p>
                         <p class="flex items-center">
                             <i class="fa-solid fa-envelope mr-2.5 text-accent flex-shrink-0"></i>
-                            <span>{{ \App\Models\Setting::get('site_email', 'info@yusufakboga.com') }}</span>
+                            <span>{{ \App\Models\Setting::get('site_email', 'info@velora.com') }}</span>
                         </p>
                         <p class="flex items-start text-xs text-white/50 pt-1">
                             <i class="fa-regular fa-clock mt-0.5 mr-2 text-accent flex-shrink-0"></i>
@@ -543,7 +553,7 @@
 
             <!-- Bottom Copyright & Payment Badges -->
             <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-white/50 gap-4">
-                <p>© 2026 Yusuf Akboğa Ayakkabı. Tüm hakları saklıdır.</p>
+                <p>© {{ date('Y') }} VELORA Luxury Footwear. Tüm hakları saklıdır.</p>
                 <div class="flex items-center space-x-4 text-white/40">
                     <span class="flex items-center"><i class="fa-solid fa-lock text-accent mr-1"></i> 256-Bit SSL Güvenli Alışveriş</span>
                     <span>•</span>

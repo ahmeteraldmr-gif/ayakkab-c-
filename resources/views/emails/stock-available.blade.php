@@ -8,8 +8,8 @@
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #E5E7EB;">
         
         <div style="background-color: #111111; padding: 25px 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 20px; letter-spacing: 1px;">YUSUF AKBOĞA</h1>
-            <p style="color: #C79A58; margin: 5px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px;">Ayakkabı / Footwear</p>
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; letter-spacing: 2px; font-weight: 700;">VELORA</h1>
+            <p style="color: #C79A58; margin: 5px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px;">Tarzın Adımlarında</p>
         </div>
 
         <div style="padding: 30px;">
@@ -48,7 +48,7 @@
         </div>
 
         <div style="background-color: #F9FAFB; padding: 20px 30px; border-top: 1px solid #E5E7EB; text-align: center; font-size: 11px; color: #6B7280;">
-            <p style="margin: 0 0 5px 0;">Yusuf Akboğa Ayakkabı • Bağdat Caddesi No: 184/A Kadıköy / İstanbul</p>
+            <p style="margin: 0 0 5px 0;">VELORA Luxury Footwear • Bağdat Caddesi No: 184/A Kadıköy / İstanbul</p>
             <p style="margin: 0;">Bu e-posta, web sitemiz üzerinden talep ettiğiniz stok bildirimi doğrultusunda gönderilmiştir.</p>
         </div>
     </div>

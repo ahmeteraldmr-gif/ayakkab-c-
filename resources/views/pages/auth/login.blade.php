@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Müşteri Girişi | Yusuf Akboğa Ayakkabı')
+@section('title', 'Müşteri Girişi | VELORA')
 
 @section('content')
 <div class="min-h-[75vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -10,7 +10,7 @@
                 <i class="fa-solid fa-user-lock text-2xl"></i>
             </div>
             <h1 class="font-display font-bold text-2xl text-white">Müşteri Girişi</h1>
-            <p class="text-xs text-white/60">Yusuf Akboğa Ayakkabı hesabınıza giriş yaparak siparişlerinizi ve adreslerinizi yönetin.</p>
+            <p class="text-xs text-white/60">VELORA hesabınıza giriş yaparak siparişlerinizi ve adreslerinizi yönetin.</p>
         </div>
 
         @if($errors->any())

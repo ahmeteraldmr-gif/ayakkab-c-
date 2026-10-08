@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Numara Bazlı Stok Yönetimi | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Numara Bazlı Stok Yönetimi | VELORA Yönetim Paneli')
 @section('page_title', 'Numara Bazlı Stok Matrisi')
 
 @section('content')

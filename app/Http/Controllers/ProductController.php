@@ -241,7 +241,7 @@ class ProductController extends Controller
         $waPhone = Setting::get('site_whatsapp', '905550000000');
         $cleanPhone = preg_replace('/[^0-9]/', '', $waPhone);
         $productUrl = url()->current();
-        $waMessage = rawurlencode("Merhaba Yusuf Akboğa Ayakkabı, {$product->name} (Kod: {$product->sku}) ürünü hakkında bilgi almak istiyorum. Ürün linki: {$productUrl}");
+        $waMessage = rawurlencode("Merhaba VELORA, {$product->name} (Kod: {$product->sku}) ürünü hakkında bilgi almak istiyorum. Ürün linki: {$productUrl}");
         $whatsappLink = "https://wa.me/{$cleanPhone}?text={$waMessage}";
 
         return view('pages.product-detail', compact(

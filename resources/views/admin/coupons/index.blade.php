@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Kuponlar | Yusuf Akboğa Yönetim')
+@section('title', 'Kuponlar | VELORA Yönetim')
 @section('page_title', 'İndirim Kuponları')
 
 @section('header_actions')

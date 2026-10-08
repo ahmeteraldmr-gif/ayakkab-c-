@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'İletişim & Mağaza | Yusuf Akboğa Ayakkabı')
+@section('title', 'İletişim & Mağaza | VELORA')
 
 @section('content')
 
@@ -69,8 +69,8 @@
                             </div>
                             <div>
                                 <span class="font-bold text-dark block text-xs">E-Posta</span>
-                                <a href="mailto:{{ \App\Models\Setting::get('site_email', 'info@yusufakboga.com') }}" class="hover:text-accent font-semibold block mt-0.5">
-                                    {{ \App\Models\Setting::get('site_email', 'info@yusufakboga.com') }}
+                                <a href="mailto:{{ \App\Models\Setting::get('site_email', 'info@velora.com') }}" class="hover:text-accent font-semibold block mt-0.5">
+                                    {{ \App\Models\Setting::get('site_email', 'info@velora.com') }}
                                 </a>
                             </div>
                         </div>
@@ -120,7 +120,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-dark mb-1.5">Adınız ve Soyadınız <span class="text-rose-500">*</span></label>
-                                <input type="text" name="name" value="{{ old('name') }}" required placeholder="Örn: Yusuf Akboğa" 
+                                <input type="text" name="name" value="{{ old('name') }}" required placeholder="Örn: Ahmet Yılmaz" 
                                        class="w-full bg-[#F7F7F5] border border-black/10 rounded-xl px-4 py-3 text-xs text-dark focus:outline-none focus:border-accent">
                             </div>
 

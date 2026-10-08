@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Alışveriş Sepetim | Yusuf Akboğa Ayakkabı')
+@section('title', 'Alışveriş Sepetim | VELORA')
 
 @section('content')
 

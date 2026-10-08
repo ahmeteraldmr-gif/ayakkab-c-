@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Kampanyayı Düzenle | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Kampanyayı Düzenle | VELORA Yönetim Paneli')
 @section('page_title')
     Kampanyayı Düzenle: {{ $campaign->title }}
 @endsection

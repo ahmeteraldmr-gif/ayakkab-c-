@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Stok Hareket Geçmişi | Yusuf Akboğa')
+@section('title', 'Stok Hareket Geçmişi | VELORA')
 @section('page_title', 'Stok Hareketleri & Denetim Kayıtları')
 
 @section('header_actions')

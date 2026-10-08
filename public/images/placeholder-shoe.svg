@@ -3,6 +3,6 @@
     <circle cx="300" cy="300" r="180" fill="#292929"/>
     <path d="M180 340C210 340 240 330 260 300C280 270 310 240 360 240C400 240 430 260 440 300C445 320 440 350 420 370C390 400 320 410 240 410C190 410 160 380 160 350C160 345 170 340 180 340Z" fill="#C79A58" fill-opacity="0.3"/>
     <path d="M200 330C230 330 255 310 280 280C300 255 330 230 370 230C410 230 430 255 435 285C440 315 420 345 390 365C340 395 280 395 210 390C180 388 175 350 180 340C185 332 192 330 200 330Z" stroke="#C79A58" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="300" y="470" text-anchor="middle" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="bold" font-size="20" letter-spacing="2">YUSUF AKBOĞA</text>
-    <text x="300" y="495" text-anchor="middle" fill="#C79A58" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="12" letter-spacing="4">AYAKKABI / FOOTWEAR</text>
+    <text x="300" y="470" text-anchor="middle" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="bold" font-size="24" letter-spacing="4">VELORA</text>
+    <text x="300" y="495" text-anchor="middle" fill="#C79A58" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="11" letter-spacing="3">TARZIN ADIMLARINDA</text>
 </svg>

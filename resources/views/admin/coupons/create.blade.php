@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Yeni Kupon Oluştur | Yusuf Akboğa')
+@section('title', 'Yeni Kupon Oluştur | VELORA')
 @section('page_title', 'Yeni İndirim Kuponu Ekle')
 
 @section('header_actions')
@@ -27,7 +27,7 @@
                            id="code" 
                            value="{{ old('code') }}" 
                            required 
-                           placeholder="Örn: YUSUF10 veya 250TL" 
+                           placeholder="Örn: VELORA10 veya 250TL" 
                            class="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-sm text-gray-900 font-mono font-bold uppercase focus:border-blue-600 focus:outline-none transition-colors">
                     @error('code')
                         <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>

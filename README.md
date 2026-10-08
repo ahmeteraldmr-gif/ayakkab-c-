@@ -1,6 +1,6 @@
-# Yusuf Akboğa Ayakkabı — Modern & Premium E-Ticaret Platformu
+# VELORA — Luxury & Modern Footwear E-Ticaret Platformu
 
-Yusuf Akboğa Ayakkabı, modern sneaker ve klasik ayakkabı koleksiyonları için tasarlanmış, tam donanımlı, yüksek performanslı ve mobil uyumlu bir Laravel e-ticaret platformudur.
+VELORA — "Tarzın Adımlarında", seçkin sneaker ve lüks ayakkabı koleksiyonları için tasarlanmış, tam donanımlı, yüksek performanslı ve mobil uyumlu bir Laravel e-ticaret platformudur.
 
 ---
 
@@ -77,8 +77,8 @@ Siteye tarayıcınızdan `http://127.0.0.1:8000` adresinden erişebilirsiniz.
 ## 🔑 Varsayılan Yönetici Bilgileri
 
 - **Giriş URL:** `http://127.0.0.1:8000/admin/login`
-- **E-posta:** `admin@yusufakboga.com`
-- **Şifre:** `password`
+- **E-posta:** `admin@velora.com`
+- **Şifre:** `admin123`
 
 ---
 

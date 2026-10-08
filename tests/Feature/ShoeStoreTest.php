@@ -33,7 +33,7 @@ class ShoeStoreTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertStatus(200);
-        $response->assertSee('YUSUF AKBOĞA');
+        $response->assertSee('VELORA');
         $response->assertSee('Tarzını');
         $response->assertSee('Adımlarınla');
         $response->assertSee('Yeni Gelen Modeller');
@@ -369,7 +369,7 @@ class ShoeStoreTest extends TestCase
         // 2. Unwhitelisted key should not be written to settings table
         $responseOk = $this->actingAs($admin)
                            ->post(route('admin.settings.update'), [
-                               'site_name' => 'Yusuf Akboğa Ayakkabı',
+                               'site_name' => 'VELORA',
                                'arbitrary_unwhitelisted_key' => 'hacked_val',
                            ]);
 
@@ -423,7 +423,7 @@ class ShoeStoreTest extends TestCase
 
         // Admin login
         $loginResponse = $this->post(route('admin.login.submit'), [
-            'email' => 'admin@yusufakboga.com',
+            'email' => 'admin@velora.com',
             'password' => 'admin123',
         ]);
         $loginResponse->assertRedirect(route('admin.dashboard'));

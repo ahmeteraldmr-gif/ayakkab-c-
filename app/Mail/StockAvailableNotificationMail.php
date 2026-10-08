@@ -24,7 +24,7 @@ class StockAvailableNotificationMail extends Mailable implements ShouldQueue
     {
         $sizeText = $this->size ? " ({$this->size->size_number} Numara)" : "";
         return new Envelope(
-            subject: "Müjde! '{$this->product->name}'{$sizeText} Yeniden Stokta | Yusuf Akboğa",
+            subject: "Müjde! '{$this->product->name}'{$sizeText} Yeniden Stokta | VELORA",
         );
     }
 

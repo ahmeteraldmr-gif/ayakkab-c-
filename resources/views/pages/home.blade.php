@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Yusuf Akboğa Ayakkabı | Tarzını Adımlarınla Göster')
+@section('title', 'VELORA | Tarzın Adımlarında')
 
 @section('content')
 
@@ -18,7 +18,7 @@
                     
                     <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/5 border border-accent/30 text-accent text-xs sm:text-[13px] font-semibold tracking-normal">
                         <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
-                        <span class="truncate">2026 Premium Sneaker Koleksiyonu</span>
+                        <span class="truncate">2026 VELORA Premium Sneaker Koleksiyonu</span>
                     </div>
 
                     <h1 class="hero-main-title text-white font-extrabold select-none">
@@ -28,7 +28,7 @@
                     </h1>
 
                     <p class="hero-description text-white/80 max-w-2xl mx-auto lg:mx-0 font-normal">
-                        Yeni sezon ayakkabı modellerini keşfet. Günlük kullanımdan özel kombinlere kadar tarzına en uygun modeli Yusuf Akboğa güvencesiyle bul.
+                        Yeni sezon ayakkabı modellerini keşfet. Günlük kullanımdan özel kombinlere kadar tarzına en uygun modeli VELORA güvencesiyle bul.
                     </p>
 
                     <!-- Hero CTAs -->
@@ -72,7 +72,7 @@
 
                         <!-- Sneaker Photo -->
                         <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&auto=format&fit=crop&q=80" 
-                             alt="Yusuf Akboğa Hero Sneaker" 
+                             alt="VELORA Hero Sneaker" 
                              class="w-full h-auto max-h-56 sm:max-h-72 object-contain transform -rotate-12 group-hover:rotate-0 group-hover:scale-105 transition-all duration-700 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]">
 
                         <!-- Floating Bottom Tag -->
@@ -81,7 +81,7 @@
                                 <i class="fa-solid fa-shoe-prints text-xs sm:text-sm"></i>
                             </div>
                             <div>
-                                <p class="text-[11px] sm:text-xs font-bold text-white leading-tight">Yusuf Akboğa Signature</p>
+                                <p class="text-[11px] sm:text-xs font-bold text-white leading-tight">VELORA Signature</p>
                                 <p class="text-[9px] sm:text-[10px] text-accent font-semibold leading-tight">Özel Seçim Modeller</p>
                             </div>
                         </div>
@@ -227,7 +227,7 @@
             <div class="text-center max-w-2xl mx-auto mb-12">
                 <span class="text-xs font-bold uppercase tracking-widest text-accent">Güven & Kalite</span>
                 <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-dark mt-1">Neden Bizi Tercih Etmelisiniz?</h2>
-                <p class="text-black/60 text-sm mt-2">Yusuf Akboğa Ayakkabı olarak her adımınızda yüksek kalite ve kusursuz alışveriş deneyimi sunuyoruz.</p>
+                <p class="text-black/60 text-sm mt-2">VELORA olarak her adımınızda yüksek kalite, lüks ve kusursuz alışveriş deneyimi sunuyoruz.</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -280,7 +280,7 @@
                 <!-- Left Story Content -->
                 <div class="lg:col-span-6 space-y-6">
                     <span class="inline-block px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-xs font-semibold tracking-wider uppercase">
-                        Yusuf Akboğa Hikayesi
+                        VELORA Hikayesi
                     </span>
 
                     <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
@@ -288,7 +288,7 @@
                     </h2>
 
                     <p class="text-white/70 text-sm sm:text-base leading-relaxed">
-                        {{ \App\Models\Setting::get('about_mini', 'Yusuf Akboğa Ayakkabı, adımlarınıza prestij ve konfor katmak amacıyla kurulmuş seçkin bir ayakkabı mağazasıdır.') }}
+                        {{ \App\Models\Setting::get('about_mini', 'VELORA, adımlarınıza prestij, estetik ve konfor katmak amacıyla kurulmuş seçkin ve modern bir ayakkabı markasıdır.') }}
                     </p>
 
                     <p class="text-white/60 text-xs sm:text-sm leading-relaxed">
@@ -307,11 +307,11 @@
                 <div class="lg:col-span-6">
                     <div class="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                         <img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1000&auto=format&fit=crop&q=80" 
-                             alt="Yusuf Akboğa Mağaza" 
+                             alt="VELORA Mağaza" 
                              class="w-full h-80 sm:h-96 object-cover filter brightness-90 hover:scale-105 transition-transform duration-700">
                         <div class="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent"></div>
                         <div class="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-dark/80 backdrop-blur border border-white/10">
-                            <p class="font-display font-bold text-white text-sm">Yusuf Akboğa Showroom & Butik</p>
+                            <p class="font-display font-bold text-white text-sm">VELORA Showroom & Butik</p>
                             <p class="text-accent text-xs font-medium">{{ \App\Models\Setting::get('site_address', 'Bağdat Caddesi No: 184/A Kadıköy / İstanbul') }}</p>
                         </div>
                     </div>

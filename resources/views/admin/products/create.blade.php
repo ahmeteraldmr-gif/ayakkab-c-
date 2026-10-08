@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Yeni Ürün Ekle | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Yeni Ürün Ekle | VELORA Yönetim Paneli')
 @section('page_title', 'Yeni Ürün Ekle')
 
 @section('content')

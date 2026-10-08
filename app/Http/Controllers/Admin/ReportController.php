@@ -175,7 +175,7 @@ class ReportController extends Controller
         $startDate = $request->filled('start_date') ? Carbon::parse($request->query('start_date'))->startOfDay() : now()->subDays(29)->startOfDay();
         $endDate = $request->filled('end_date') ? Carbon::parse($request->query('end_date'))->endOfDay() : now()->endOfDay();
 
-        $fileName = 'yusuf_akboga_satis_raporu_' . now()->format('Ymd_His') . '.csv';
+        $fileName = 'velora_satis_raporu_' . now()->format('Ymd_His') . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',

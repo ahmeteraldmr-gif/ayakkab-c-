@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Ürünü Düzenle | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Ürünü Düzenle | VELORA Yönetim Paneli')
 @section('page_title', 'Ürünü Düzenle: ' . $product->name)
 
 @section('content')

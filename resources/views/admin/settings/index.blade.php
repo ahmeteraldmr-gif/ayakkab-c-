@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Site ve Mağaza Ayarları | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Site ve Mağaza Ayarları | VELORA Yönetim Paneli')
 @section('page_title', 'Site ve Mağaza Ayarları')
 
 @section('content')
@@ -22,20 +22,20 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Mağaza / Şirket Adı</label>
-                            <input type="text" name="site_name" value="{{ $settings['site_name'] ?? 'Yusuf Akboğa Ayakkabı' }}" 
+                            <input type="text" name="site_name" value="{{ $settings['site_name'] ?? 'VELORA' }}" 
                                    class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3.5 py-2.5 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Site Başlığı (SEO Title)</label>
-                            <input type="text" name="site_title" value="{{ $settings['site_title'] ?? 'Yusuf Akboğa Ayakkabı | Modern & Premium Sneaker' }}" 
+                            <input type="text" name="site_title" value="{{ $settings['site_title'] ?? 'VELORA | Tarzın Adımlarında' }}" 
                                    class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3.5 py-2.5 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Site Genel Açıklaması (Meta Description)</label>
-                        <textarea name="site_description" rows="2" class="w-full bg-white border border-[#D1D5DB] rounded-lg p-3 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">{{ $settings['site_description'] ?? 'Yusuf Akboğa kalitesiyle en yeni ve tarz ayakkabı modellerini keşfedin.' }}</textarea>
+                        <textarea name="site_description" rows="2" class="w-full bg-white border border-[#D1D5DB] rounded-lg p-3 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">{{ $settings['site_description'] ?? 'VELORA kalitesiyle en yeni ve tarz lüks ayakkabı modellerini keşfedin.' }}</textarea>
                     </div>
                 </div>
 
@@ -62,13 +62,13 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">E-Posta Adresi</label>
-                            <input type="email" name="site_email" value="{{ $settings['site_email'] ?? 'info@yusufakboga.com' }}" 
+                            <input type="email" name="site_email" value="{{ $settings['site_email'] ?? 'info@velora.com' }}" 
                                    class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3.5 py-2.5 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Instagram Profili URL</label>
-                            <input type="text" name="site_instagram" value="{{ $settings['site_instagram'] ?? 'https://instagram.com/yusufakboga_ayakkabi' }}" 
+                            <input type="text" name="site_instagram" value="{{ $settings['site_instagram'] ?? 'https://instagram.com/velora_official' }}" 
                                    class="w-full bg-white border border-[#D1D5DB] rounded-lg px-3.5 py-2.5 text-xs text-[#111827] focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20">
                         </div>
                     </div>

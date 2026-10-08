@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Sipariş Takip | Yusuf Akboğa Ayakkabı')
-@section('meta_description', 'Yusuf Akboğa Ayakkabı siparişinizin güncel durumunu, kargo takip numarasını ve teslimat sürecini kolayca sorgulayın.')
+@section('title', 'Sipariş Takip | VELORA')
+@section('meta_description', 'VELORA siparişinizin güncel durumunu, kargo takip numarasını ve teslimat sürecini kolayca sorgulayın.')
 
 @section('content')
 <div class="bg-gray-950 py-10 sm:py-14 text-white min-h-[75vh]">

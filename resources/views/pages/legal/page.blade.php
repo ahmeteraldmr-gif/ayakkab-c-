@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $title . ' | Yusuf Akboğa Ayakkabı')
+@section('title', $title . ' | VELORA')
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -18,7 +18,7 @@
         <div class="border-b border-white/10 pb-6">
             <span class="text-xs font-semibold text-accent uppercase tracking-widest">Yasal Bilgilendirme & Şartlar</span>
             <h1 class="font-display font-black text-2xl sm:text-3xl text-white mt-1.5">{{ $title }}</h1>
-            <p class="text-xs text-white/50 mt-1">Son Güncelleme: 2026 • Yusuf Akboğa Ayakkabı & Ayakkabıcılık</p>
+            <p class="text-xs text-white/50 mt-1">Son Güncelleme: 2026 • VELORA Luxury Footwear</p>
         </div>
 
         <div class="prose prose-invert max-w-none text-white/80 text-sm leading-relaxed space-y-6">
@@ -27,7 +27,7 @@
 
         <div class="pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-white/50">
             <div>
-                Sorularınız veya talepleriniz için: <a href="mailto:{{ \App\Models\Setting::get('site_email', 'info@yusufakboga.com') }}" class="text-accent underline">{{ \App\Models\Setting::get('site_email', 'info@yusufakboga.com') }}</a>
+                Sorularınız veya talepleriniz için: <a href="mailto:{{ \App\Models\Setting::get('site_email', 'info@velora.com') }}" class="text-accent underline">{{ \App\Models\Setting::get('site_email', 'info@velora.com') }}</a>
             </div>
             <a href="{{ route('home') }}" class="text-accent hover:underline flex items-center">
                 <i class="fa-solid fa-arrow-left mr-1.5"></i> Ana Sayfaya Dön

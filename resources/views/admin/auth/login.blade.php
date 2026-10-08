@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="robots" content="noindex, nofollow">
-    <title>Yönetim Paneli Girişi | Yusuf Akboğa Ayakkabı</title>
+    <title>Yönetim Paneli Girişi | VELORA</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,7 +82,7 @@
             
             <!-- High-Res Sneaker Image Background -->
             <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?w=1600&auto=format&fit=crop&q=85" 
-                 alt="Yusuf Akboğa Sneaker" 
+                 alt="VELORA Sneaker" 
                  class="absolute inset-0 w-full h-full object-cover object-center scale-105 transition-transform duration-1000 ease-out"
                  loading="eager">
 
@@ -92,11 +92,9 @@
 
             <!-- Top Brand Tag -->
             <div class="relative z-10 flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-600/90 text-white flex items-center justify-center font-extrabold text-sm shadow-lg shadow-blue-500/20 backdrop-blur-xs border border-white/10">
-                    YA
-                </div>
+                <img src="{{ asset('images/velora-symbol.svg') }}" alt="VELORA Logo" class="w-10 h-10 filter invert brightness-200">
                 <div>
-                    <span class="block font-bold text-white text-base tracking-tight leading-tight">YUSUF AKBOĞA</span>
+                    <span class="block font-bold text-white text-base tracking-[0.15em] leading-tight">VELORA</span>
                     <span class="block text-[10px] tracking-[0.25em] font-semibold text-blue-400 uppercase">YÖNETİM SİSTEMİ</span>
                 </div>
             </div>
@@ -111,11 +109,11 @@
                 </div>
 
                 <!-- Main Titles -->
-                <h1 class="font-extrabold text-3xl xl:text-4xl text-white tracking-tight leading-tight mb-2">
-                    YUSUF AKBOĞA
+                <h1 class="font-extrabold text-3xl xl:text-4xl text-white tracking-[0.15em] leading-tight mb-2">
+                    VELORA
                 </h1>
-                <p class="text-sm font-semibold tracking-[0.2em] text-blue-400 uppercase mb-4">
-                    AYAKKABI / FOOTWEAR
+                <p class="text-sm font-semibold tracking-[0.25em] text-[#C79A58] uppercase mb-4">
+                    TARZIN ADIMLARINDA
                 </p>
 
                 <p class="text-base text-gray-300 font-normal leading-relaxed mb-8">
@@ -142,7 +140,7 @@
 
             <!-- Hero Footer -->
             <div class="relative z-10 text-xs text-gray-400 font-medium">
-                © {{ date('Y') }} Yusuf Akboğa Ayakkabı. Tüm hakları saklıdır.
+                © {{ date('Y') }} VELORA Luxury Footwear. Tüm hakları saklıdır.
             </div>
 
         </div>
@@ -154,10 +152,8 @@
             <div class="flex items-center justify-between w-full max-w-md mx-auto mb-6">
                 <!-- Mobile Logo (Shown only on small screens) -->
                 <div class="flex items-center space-x-2.5 lg:hidden">
-                    <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                        YA
-                    </div>
-                    <span class="font-extrabold text-sm text-[#111827] tracking-tight">YUSUF AKBOĞA</span>
+                    <img src="{{ asset('images/velora-symbol.svg') }}" alt="VELORA Logo" class="w-8 h-8">
+                    <span class="font-extrabold text-base text-[#111827] tracking-[0.15em]">VELORA</span>
                 </div>
 
                 <a href="{{ route('home') }}" class="inline-flex items-center space-x-2 text-xs font-semibold text-[#6B7280] hover:text-[#2563EB] transition-colors ml-auto py-1.5 px-3 rounded-lg hover:bg-white border border-transparent hover:border-[#E5E7EB]">
@@ -177,8 +173,8 @@
                         <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg mb-3.5 border border-blue-100/60">
                             <i class="fa-solid fa-lock text-sm"></i>
                         </div>
-                        <h2 class="font-bold text-2xl text-[#111827] tracking-tight">
-                            Yusuf Akboğa
+                        <h2 class="font-bold text-2xl text-[#111827] tracking-wider">
+                            VELORA
                         </h2>
                         <p class="text-sm font-medium text-[#6B7280] mt-1">
                             Yönetim Paneline Giriş
@@ -221,7 +217,7 @@
                                        required 
                                        autocomplete="email" 
                                        autofocus 
-                                       placeholder="admin@yusufakboga.com"
+                                       placeholder="admin@velora.com"
                                        class="w-full h-[50px] bg-white border @error('email') border-red-500 focus:border-red-500 focus:ring-red-500/10 @else border-[#E5E7EB] focus:border-[#2563EB] focus:ring-blue-500/15 @enderror rounded-xl pl-10 pr-4 text-[15px] text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-4 transition-all">
                             </div>
                             @error('email')
@@ -297,7 +293,7 @@
 
             <!-- Right Column Bottom Copyright -->
             <div class="w-full max-w-md mx-auto text-center text-xs text-[#9CA3AF] mt-6">
-                Yusuf Akboğa Ayakkabı E-Ticaret Yönetim Platformu
+                VELORA Luxury Footwear E-Ticaret Yönetim Platformu
             </div>
 
         </div>

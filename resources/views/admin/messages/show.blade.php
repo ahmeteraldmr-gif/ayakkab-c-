@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Mesaj Detayı | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Mesaj Detayı | VELORA Yönetim Paneli')
 @section('page_title', 'Mesaj Detayı')
 
 @section('content')
@@ -50,7 +50,7 @@
             @endphp
             @if(strlen($digits) >= 10)
                 <div class="pt-4 border-t border-[#E5E7EB]">
-                    <a href="https://wa.me/{{ strlen($digits) == 10 ? '90' . $digits : $digits }}?text={{ urlencode('Merhaba ' . $message->name . ', Yusuf Akboğa Ayakkabı web sitemiz üzerinden ilettiğiniz mesajınızla ilgili yazıyoruz.') }}" 
+                    <a href="https://wa.me/{{ strlen($digits) == 10 ? '90' . $digits : $digits }}?text={{ urlencode('Merhaba ' . $message->name . ', VELORA web sitemiz üzerinden ilettiğiniz mesajınızla ilgili yazıyoruz.') }}" 
                        target="_blank"
                        class="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs">
                         <i class="fa-brands fa-whatsapp mr-2 text-base"></i> WhatsApp Üzerinden Yanıtla

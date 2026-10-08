@@ -23,7 +23,7 @@ class OrderCreatedCustomerMail extends Mailable
     public function __construct(Order $order)
     {
         $this->order = $order->loadMissing('items');
-        $this->siteName = Setting::get('site_name', 'Yusuf Akboğa Ayakkabı');
+        $this->siteName = Setting::get('site_name', 'VELORA');
     }
 
     /**

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Yeni Şifre Belirle | Yusuf Akboğa Ayakkabı')
+@section('title', 'Yeni Şifre Belirle | VELORA')
 
 @section('content')
 <div class="min-h-[75vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

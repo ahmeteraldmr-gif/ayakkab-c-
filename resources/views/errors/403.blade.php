@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', '403 - Erişim Yetkisi Yok | Yusuf Akboğa Ayakkabı')
+@section('title', '403 - Erişim Yetkisi Yok | VELORA')
 
 @section('content')
 <div class="min-h-[60vh] flex items-center justify-center py-16 px-4">

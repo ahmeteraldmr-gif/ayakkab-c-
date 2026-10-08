@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Kampanya & Banner Yönetimi | Yusuf Akboğa Yönetim Paneli')
+@section('title', 'Kampanya & Banner Yönetimi | VELORA Yönetim Paneli')
 @section('page_title', 'Kampanya & Banner Yönetimi')
 
 @section('content')

@@ -12,7 +12,7 @@ class LegalPageController extends Controller
         return view('pages.legal.page', [
             'pageTitle' => 'KVKK Aydınlatma Metni',
             'contentKey' => 'legal_kvkk',
-            'defaultContent' => 'Yusuf Akboğa Ayakkabı olarak 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, veri sorumlusu sıfatıyla kişisel verilerinizin güvenliğine ve gizliliğine azami önem vermekteyiz.',
+            'defaultContent' => 'VELORA olarak 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, veri sorumlusu sıfatıyla kişisel verilerinizin güvenliğine ve gizliliğine azami önem vermekteyiz.',
         ]);
     }
 
@@ -21,7 +21,7 @@ class LegalPageController extends Controller
         return view('pages.legal.page', [
             'pageTitle' => 'Gizlilik Politikası',
             'contentKey' => 'legal_privacy',
-            'defaultContent' => 'Yusuf Akboğa Ayakkabı web sitesini ziyaret eden kullanıcılarımızın gizlilik haklarını korumak temel ilkemizdir. Kişisel bilgileriniz üçüncü şahıslarla ticari amaçla paylaşılmaz.',
+            'defaultContent' => 'VELORA web sitesini ziyaret eden kullanıcılarımızın gizlilik haklarını korumak temel ilkemizdir. Kişisel bilgileriniz üçüncü şahıslarla ticari amaçla paylaşılmaz.',
         ]);
     }
 

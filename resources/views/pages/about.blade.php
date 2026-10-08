@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Hakkımızda | Yusuf Akboğa Ayakkabı')
+@section('title', 'Hakkımızda | VELORA')
 
 @section('content')
 
     <!-- Header Banner -->
     <div class="bg-dark text-white py-12 border-b border-white/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
-            <span class="text-xs font-bold uppercase tracking-widest text-accent">Mağazamız & Hikayemiz</span>
-            <h1 class="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white">
-                Yusuf Akboğa Ayakkabı
+            <span class="text-xs font-bold uppercase tracking-widest text-accent">Markamız & Hikayemiz</span>
+            <h1 class="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-wider">
+                VELORA
             </h1>
             <p class="text-white/60 text-sm max-w-xl mx-auto italic">
-                “Herkes yürür, tarzını sen belirlersin.”
+                “Tarzın Adımlarında — Lüks ve Konforun Buluştuğu Nokta.”
             </p>
         </div>
     </div>
@@ -24,7 +24,7 @@
             
             <div class="lg:col-span-6 space-y-6">
                 <span class="inline-block px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-xs font-bold uppercase tracking-wider">
-                    Kurucumuzdan
+                    Marka Vizyonumuz
                 </span>
                 
                 <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-dark leading-tight">
@@ -33,10 +33,10 @@
 
                 <div class="space-y-4 text-black/70 text-sm leading-relaxed">
                     <p>
-                        {{ \App\Models\Setting::get('about_full', '2016 yılında Yusuf Akboğa tarafından kurulan mağazamız, ayakkabı sektöründe kalite ve estetiği bir araya getirme vizyonuyla yola çıkmıştır. Müşteri memnuniyetini en üst düzeyde tutarak, dünya standartlarında orijinal markaları ve özel tasarım ayakkabıları sunmaktayız.') }}
+                        {{ \App\Models\Setting::get('about_full', 'VELORA, ayakkabı sektöründe kalite, zarafet ve estetiği bir araya getirme vizyonuyla yola çıkmıştır. Müşteri memnuniyetini en üst düzeyde tutarak, dünya standartlarında orijinal modelleri ve seçkin koleksiyonları sunmaktayız.') }}
                     </p>
                     <p>
-                        Ayakkabı yalnızca bir giyim eşyası değil, bir duruş ve özgüven ifadesidir. Bu anlayışla mağazamızda yer alan her bir sneaker ve klasik model, kalite kontrol süreçlerimizden titizlikle geçirilerek sizlerin beğenisine sunulur.
+                        Ayakkabı yalnızca bir giyim eşyası değil, bir duruş ve özgüven ifadesidir. Bu anlayışla VELORA bünyesinde yer alan her bir sneaker ve klasik model, kalite kontrol süreçlerimizden titizlikle geçirilerek sizlerin beğenisine sunulur.
                     </p>
                 </div>
 
@@ -61,11 +61,11 @@
             <div class="lg:col-span-6">
                 <div class="relative rounded-3xl overflow-hidden border border-black/5 shadow-2xl">
                     <img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1000&auto=format&fit=crop&q=80" 
-                         alt="Yusuf Akboğa Mağazası" 
+                         alt="VELORA Mağazası" 
                          class="w-full h-[450px] object-cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-dark/80 via-transparent to-transparent"></div>
                     <div class="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-dark/80 backdrop-blur border border-white/10 text-white">
-                        <p class="font-display font-bold text-sm">Yusuf Akboğa Showroom & Konsept Mağaza</p>
+                        <p class="font-display font-bold text-sm">VELORA Showroom & Konsept Mağaza</p>
                         <p class="text-accent text-xs">{{ \App\Models\Setting::get('site_address', 'Bağdat Caddesi No: 184/A Kadıköy / İstanbul') }}</p>
                     </div>
                 </div>

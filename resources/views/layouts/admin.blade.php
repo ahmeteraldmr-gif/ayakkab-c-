@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Yönetim Paneli | Yusuf Akboğa Ayakkabı')</title>
+    <title>@yield('title', 'Yönetim Paneli | VELORA')</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -101,13 +102,16 @@
             
             <!-- Admin Brand / Logo & Mobile Close -->
             <div class="p-5 border-b border-[#1F2937] flex items-center justify-between flex-shrink-0">
-                <a href="{{ route('admin.dashboard') }}" class="flex flex-col group">
-                    <span class="font-sans font-extrabold text-base tracking-tight text-white group-hover:text-blue-400 transition-colors">
-                        YUSUF AKBOĞA
-                    </span>
-                    <span class="text-[10px] tracking-[0.25em] font-semibold text-blue-400 uppercase mt-0.5">
-                        Yönetim Paneli
-                    </span>
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 group">
+                    <img src="{{ asset('images/velora-symbol.svg') }}" alt="VELORA Logo" class="h-8 w-8 filter invert brightness-200 group-hover:scale-105 transition-transform">
+                    <div class="flex flex-col">
+                        <span class="font-sans font-extrabold text-base tracking-wider text-white group-hover:text-blue-400 transition-colors">
+                            VELORA
+                        </span>
+                        <span class="text-[9.5px] tracking-[0.22em] font-semibold text-blue-400 uppercase">
+                            Yönetim Paneli
+                        </span>
+                    </div>
                 </a>
                 <button type="button" onclick="toggleAdminSidebar(false)" class="md:hidden text-gray-400 hover:text-white text-lg p-1" aria-label="Menüyü Kapat">
                     <i class="fa-solid fa-xmark"></i>
@@ -204,10 +208,10 @@
             <div class="flex items-center justify-between pt-1 px-1">
                 <div class="flex items-center space-x-2.5 min-w-0">
                     <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-sm flex-shrink-0">
-                        YA
+                        {{ strtoupper(substr(auth()->user()->name ?? 'V', 0, 2)) }}
                     </div>
                     <div class="text-xs min-w-0 truncate">
-                        <p class="font-bold text-white text-[12.5px] truncate">{{ auth()->user()->name ?? 'Yusuf Akboğa' }}</p>
+                        <p class="font-bold text-white text-[12.5px] truncate">{{ auth()->user()->name ?? 'VELORA Admin' }}</p>
                         <p class="text-gray-400 text-[10.5px]">Yönetici</p>
                     </div>
                 </div>

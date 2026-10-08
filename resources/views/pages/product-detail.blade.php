@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $product->meta_title ?? ($product->name . ' | Yusuf Akboğa Ayakkabı'))
+@section('title', $product->meta_title ?? ($product->name . ' | VELORA'))
 @section('meta_description', $product->meta_description ?? $product->short_description)
 @section('og_image', $product->primary_image_url)
 @section('og_type', 'product')
@@ -54,7 +54,7 @@
             'sku' => $product->sku,
             'brand' => [
                 '@type' => 'Brand',
-                'name' => $product->brand?->name ?? 'Yusuf Akboğa',
+                'name' => $product->brand?->name ?? 'VELORA',
             ],
             'offers' => [
                 '@type' => 'Offer',
@@ -187,7 +187,7 @@
                     <!-- Brand & SKU -->
                     <div class="flex items-center justify-between border-b border-black/5 pb-3">
                         <span class="font-display font-extrabold text-sm text-accent uppercase tracking-widest">
-                            {{ $product->brand?->name ?? 'Yusuf Akboğa Signature' }}
+                            {{ $product->brand?->name ?? 'VELORA Signature' }}
                         </span>
                         <span class="text-xs font-mono text-black/40">
                             Kod: {{ $product->sku }}
