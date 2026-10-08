@@ -89,7 +89,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/sifre-sifirla/{token}', [CustomerAuthController::class, 'showResetPasswordForm'])->name('password.reset');
     Route::post('/sifre-sifirla', [CustomerAuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.update');
 });
-Route::post('/cikis-yap', [CustomerAuthController::class, 'logout'])->middleware('auth')->name('logout');
+Route::match(['get', 'post'], '/cikis-yap', [CustomerAuthController::class, 'logout'])->name('logout');
 
 // Customer Portal Routes
 Route::middleware('auth')->prefix('hesabim')->name('customer.')->group(function () {
@@ -130,7 +130,7 @@ Route::get('/beden-rehberi', [PageController::class, 'sizeGuide'])->name('size.g
 // Admin Authentication
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1')->name('admin.login.submit');
-Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+Route::match(['get', 'post'], '/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // Protected Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
