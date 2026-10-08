@@ -16,7 +16,11 @@ class CouponController extends Controller
      */
     public function index(): View
     {
-        $coupons = Coupon::orderByDesc('id')->paginate(15);
+        try {
+            $coupons = Coupon::orderByDesc('id')->paginate(15);
+        } catch (\Throwable $e) {
+            $coupons = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
+        }
 
         return view('admin.coupons.index', compact('coupons'));
     }

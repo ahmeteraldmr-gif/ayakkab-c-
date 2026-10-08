@@ -26,15 +26,27 @@ class AuditLog extends Model
     /**
      * Helper method to quickly record an audit log entry.
      */
-    public static function record(string $action, ?string $modelType = null, ?int $modelId = null, ?string $description = null): self
+    public static function record(string $action, ?string $modelType = null, ?int $modelId = null, ?string $description = null): ?self
     {
-        return self::create([
-            'user_id' => Auth::id(),
-            'action' => $action,
-            'model_type' => $modelType,
-            'model_id' => $modelId,
-            'description' => $description,
-            'ip_address' => Request::ip(),
-        ]);
+        try {
+            return self::create([
+                'user_id' => Auth::id(),
+                'action' => $action,
+                'model_type' => $modelType,
+                'model_id' => $modelId,
+                'description' => $description,
+                'ip_address' => Request::ip(),
+            ]);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Alias for record
+     */
+    public static function log(string $action, ?string $modelType = null, ?int $modelId = null, ?string $description = null): ?self
+    {
+        return self::record($action, $modelType, $modelId, $description);
     }
 }

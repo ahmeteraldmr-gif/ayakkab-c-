@@ -28,119 +28,141 @@ class ReportController extends Controller
         $categoryId = $request->query('category_id');
         $productId = $request->query('product_id');
 
-        // Base Orders Query in date range
-        $ordersQuery = Order::whereBetween('created_at', [$startDate, $endDate]);
-        $totalOrdersCount = (clone $ordersQuery)->count();
-        $cancelledOrdersCount = (clone $ordersQuery)->where('status', 'iptal')->count();
-        $completedOrdersCount = (clone $ordersQuery)->where('status', 'tamamlandi')->count();
+        try {
+            // Base Orders Query in date range
+            $ordersQuery = Order::whereBetween('created_at', [$startDate, $endDate]);
+            $totalOrdersCount = (clone $ordersQuery)->count();
+            $cancelledOrdersCount = (clone $ordersQuery)->where('status', 'iptal')->count();
+            $completedOrdersCount = (clone $ordersQuery)->where('status', 'tamamlandi')->count();
 
-        $cancellationRate = $totalOrdersCount > 0 ? round(($cancelledOrdersCount / $totalOrdersCount) * 100, 1) : 0;
+            $cancellationRate = $totalOrdersCount > 0 ? round(($cancelledOrdersCount / $totalOrdersCount) * 100, 1) : 0;
 
-        $returnCount = ReturnRequest::whereBetween('created_at', [$startDate, $endDate])->where('status', 'tamamlandi')->count();
-        $returnRate = $completedOrdersCount > 0 ? round(($returnCount / $completedOrdersCount) * 100, 1) : 0;
-
-        // Base Order Items Query (excluding cancelled orders)
-        $itemsQuery = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-                               ->where('orders.status', '!=', 'iptal')
-                               ->whereBetween('orders.created_at', [$startDate, $endDate]);
-
-        if ($productId) {
-            $itemsQuery->where('order_items.product_id', $productId);
-        }
-        if ($categoryId || $brandId) {
-            $itemsQuery->join('products', 'order_items.product_id', '=', 'products.id');
-            if ($categoryId) {
-                $itemsQuery->where('products.category_id', $categoryId);
+            $returnCount = 0;
+            if (\Illuminate\Support\Facades\Schema::hasTable('return_requests')) {
+                $returnCount = ReturnRequest::whereBetween('created_at', [$startDate, $endDate])->where('status', 'tamamlandi')->count();
             }
-            if ($brandId) {
-                $itemsQuery->where('products.brand_id', $brandId);
+            $returnRate = $completedOrdersCount > 0 ? round(($returnCount / $completedOrdersCount) * 100, 1) : 0;
+
+            // Base Order Items Query (excluding cancelled orders)
+            $itemsQuery = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+                                   ->where('orders.status', '!=', 'iptal')
+                                   ->whereBetween('orders.created_at', [$startDate, $endDate]);
+
+            if ($productId) {
+                $itemsQuery->where('order_items.product_id', $productId);
             }
+            if ($categoryId || $brandId) {
+                $itemsQuery->join('products', 'order_items.product_id', '=', 'products.id');
+                if ($categoryId) {
+                    $itemsQuery->where('products.category_id', $categoryId);
+                }
+                if ($brandId) {
+                    $itemsQuery->where('products.brand_id', $brandId);
+                }
+            }
+
+            $totalUnitsSold = (int) (clone $itemsQuery)->sum('order_items.quantity');
+            $totalRevenue = (float) (clone $itemsQuery)->sum('order_items.total');
+            $activeOrdersCount = (clone $ordersQuery)->where('status', '!=', 'iptal')->count();
+            $avgOrderValue = $activeOrdersCount > 0 ? round($totalRevenue / $activeOrdersCount, 2) : 0;
+
+            // Top Selling Product
+            $topProduct = (clone $itemsQuery)
+                ->select('order_items.product_name', DB::raw('SUM(order_items.quantity) as qty'), DB::raw('SUM(order_items.total) as rev'))
+                ->groupBy('order_items.product_name')
+                ->orderByDesc('qty')
+                ->first();
+
+            // Top Selling Size
+            $topSize = (clone $itemsQuery)
+                ->select('order_items.size_number', DB::raw('SUM(order_items.quantity) as qty'))
+                ->groupBy('order_items.size_number')
+                ->orderByDesc('qty')
+                ->first();
+
+            // Top Selling Brand
+            $topBrand = DB::table('brands')
+                                 ->join('products', 'brands.id', '=', 'products.brand_id')
+                                 ->join('order_items', 'products.id', '=', 'order_items.product_id')
+                                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                                 ->where('orders.status', '!=', 'iptal')
+                                 ->whereBetween('orders.created_at', [$startDate, $endDate])
+                                 ->select('brands.name', DB::raw('SUM(order_items.quantity) as qty'), DB::raw('SUM(order_items.total) as rev'))
+                                 ->groupBy('brands.name')
+                                 ->orderByDesc('rev')
+                                 ->first();
+
+            // Top Selling Category
+            $topCategory = DB::table('categories')
+                                    ->join('products', 'categories.id', '=', 'products.category_id')
+                                    ->join('order_items', 'products.id', '=', 'order_items.product_id')
+                                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                                    ->where('orders.status', '!=', 'iptal')
+                                    ->whereBetween('orders.created_at', [$startDate, $endDate])
+                                    ->select('categories.name', DB::raw('SUM(order_items.quantity) as qty'), DB::raw('SUM(order_items.total) as rev'))
+                                    ->groupBy('categories.name')
+                                    ->orderByDesc('rev')
+                                    ->first();
+
+            // Daily Trend Data for Chart.js
+            $dailyData = Order::where('status', '!=', 'iptal')
+                              ->whereBetween('created_at', [$startDate, $endDate])
+                              ->select(
+                                  DB::raw('DATE(created_at) as date_val'),
+                                  DB::raw('SUM(total_amount) as daily_revenue'),
+                                  DB::raw('COUNT(*) as daily_orders')
+                              )
+                              ->groupBy('date_val')
+                              ->orderBy('date_val')
+                              ->get()
+                              ->keyBy('date_val');
+
+            $chartLabels = [];
+            $chartRevenue = [];
+            $chartOrders = [];
+
+            $period = Carbon::parse($startDate)->toPeriod($endDate);
+            foreach ($period as $dt) {
+                $key = $dt->format('Y-m-d');
+                $chartLabels[] = $dt->format('d M');
+                $chartRevenue[] = isset($dailyData[$key]) ? (float) $dailyData[$key]->daily_revenue : 0;
+                $chartOrders[] = isset($dailyData[$key]) ? (int) $dailyData[$key]->daily_orders : 0;
+            }
+
+            $topSellingProducts = (clone $itemsQuery)
+                ->select('order_items.product_name', DB::raw('SUM(order_items.quantity) as total_qty'), DB::raw('SUM(order_items.total) as total_revenue'))
+                ->groupBy('order_items.product_name')
+                ->orderByDesc('total_qty')
+                ->limit(5)
+                ->get();
+
+            $metrics = [
+                'total_revenue' => $totalRevenue,
+                'delivered_orders' => $completedOrdersCount,
+                'total_orders' => $totalOrdersCount,
+                'units_sold' => $totalUnitsSold,
+                'cancellation_rate' => $cancellationRate,
+                'return_rate' => $returnRate,
+                'avg_order_value' => $avgOrderValue,
+            ];
+
+            $chartValues = $chartRevenue;
+        } catch (\Throwable $e) {
+            $metrics = [
+                'total_revenue' => 0,
+                'delivered_orders' => 0,
+                'total_orders' => 0,
+                'units_sold' => 0,
+                'cancellation_rate' => 0,
+                'return_rate' => 0,
+                'avg_order_value' => 0,
+            ];
+            $topSellingProducts = collect();
+            $chartLabels = [];
+            $chartValues = [];
+            $chartRevenue = [];
+            $chartOrders = [];
         }
-
-        $totalUnitsSold = (int) (clone $itemsQuery)->sum('order_items.quantity');
-        $totalRevenue = (float) (clone $itemsQuery)->sum('order_items.total');
-        $activeOrdersCount = (clone $ordersQuery)->where('status', '!=', 'iptal')->count();
-        $avgOrderValue = $activeOrdersCount > 0 ? round($totalRevenue / $activeOrdersCount, 2) : 0;
-
-        // Top Selling Product
-        $topProduct = (clone $itemsQuery)
-            ->select('order_items.product_name', DB::raw('SUM(order_items.quantity) as qty'), DB::raw('SUM(order_items.total) as rev'))
-            ->groupBy('order_items.product_name')
-            ->orderByDesc('qty')
-            ->first();
-
-        // Top Selling Size
-        $topSize = (clone $itemsQuery)
-            ->select('order_items.size_number', DB::raw('SUM(order_items.quantity) as qty'))
-            ->groupBy('order_items.size_number')
-            ->orderByDesc('qty')
-            ->first();
-
-        // Top Selling Brand
-        $topBrand = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-                             ->join('products', 'order_items.product_id', '=', 'products.id')
-                             ->join('brands', 'products.brand_id', '=', 'brands.id')
-                             ->where('orders.status', '!=', 'iptal')
-                             ->whereBetween('orders.created_at', [$startDate, $endDate])
-                             ->select('brands.name', DB::raw('SUM(order_items.quantity) as qty'), DB::raw('SUM(order_items.total) as rev'))
-                             ->groupBy('brands.name')
-                             ->orderByDesc('rev')
-                             ->first();
-
-        // Top Selling Category
-        $topCategory = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
-                                ->join('products', 'order_items.product_id', '=', 'products.id')
-                                ->join('categories', 'products.category_id', '=', 'categories.id')
-                                ->where('orders.status', '!=', 'iptal')
-                                ->whereBetween('orders.created_at', [$startDate, $endDate])
-                                ->select('categories.name', DB::raw('SUM(order_items.quantity) as qty'), DB::raw('SUM(order_items.total) as rev'))
-                                ->groupBy('categories.name')
-                                ->orderByDesc('rev')
-                                ->first();
-
-        // Daily Trend Data for Chart.js
-        $dailyData = Order::where('status', '!=', 'iptal')
-                          ->whereBetween('created_at', [$startDate, $endDate])
-                          ->select(
-                              DB::raw('DATE(created_at) as date_val'),
-                              DB::raw('SUM(total_amount) as daily_revenue'),
-                              DB::raw('COUNT(*) as daily_orders')
-                          )
-                          ->groupBy('date_val')
-                          ->orderBy('date_val')
-                          ->get()
-                          ->keyBy('date_val');
-
-        $chartLabels = [];
-        $chartRevenue = [];
-        $chartOrders = [];
-
-        $period = Carbon::parse($startDate)->toPeriod($endDate);
-        foreach ($period as $dt) {
-            $key = $dt->format('Y-m-d');
-            $chartLabels[] = $dt->format('d M');
-            $chartRevenue[] = isset($dailyData[$key]) ? (float) $dailyData[$key]->daily_revenue : 0;
-            $chartOrders[] = isset($dailyData[$key]) ? (int) $dailyData[$key]->daily_orders : 0;
-        }
-
-        $topSellingProducts = (clone $itemsQuery)
-            ->select('order_items.product_name', DB::raw('SUM(order_items.quantity) as total_qty'), DB::raw('SUM(order_items.total) as total_revenue'))
-            ->groupBy('order_items.product_name')
-            ->orderByDesc('total_qty')
-            ->limit(5)
-            ->get();
-
-        $metrics = [
-            'total_revenue' => $totalRevenue,
-            'delivered_orders' => $completedOrdersCount,
-            'total_orders' => $totalOrdersCount,
-            'units_sold' => $totalUnitsSold,
-            'cancellation_rate' => $cancellationRate,
-            'return_rate' => $returnRate,
-            'avg_order_value' => $avgOrderValue,
-        ];
-
-        $chartValues = $chartRevenue;
 
         $startDate = $startDate->format('Y-m-d');
         $endDate = $endDate->format('Y-m-d');
