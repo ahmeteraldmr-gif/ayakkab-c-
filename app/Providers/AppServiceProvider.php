@@ -65,10 +65,10 @@ class AppServiceProvider extends ServiceProvider
                 static $adminNotificationData = null;
 
                 if ($adminNotificationData === null) {
-                    $newOrders = Order::where('status', 'yeni')->count();
-                    $unreadMessages = ContactMessage::where('is_read', false)->count();
-                    $lowStock = ProductSizeStock::where('stock', '<=', 3)->count();
-                    $pendingAlerts = StockNotification::where('is_notified', false)->count();
+                    $newOrders = \Illuminate\Support\Facades\Schema::hasTable('orders') ? Order::where('status', 'yeni')->count() : 0;
+                    $unreadMessages = \Illuminate\Support\Facades\Schema::hasTable('contact_messages') ? ContactMessage::where('is_read', false)->count() : 0;
+                    $lowStock = \Illuminate\Support\Facades\Schema::hasTable('product_size_stocks') ? ProductSizeStock::where('stock', '<=', 3)->count() : 0;
+                    $pendingAlerts = \Illuminate\Support\Facades\Schema::hasTable('stock_notifications') ? StockNotification::where('is_notified', false)->count() : 0;
 
                     $adminNotificationData = [
                         'adminNewOrdersCount' => $newOrders,
@@ -81,7 +81,13 @@ class AppServiceProvider extends ServiceProvider
 
                 $view->with($adminNotificationData);
             } catch (\Throwable $e) {
-                // Ignore if DB not ready
+                $view->with([
+                    'adminNewOrdersCount' => 0,
+                    'adminUnreadMessagesCount' => 0,
+                    'adminLowStockCount' => 0,
+                    'adminPendingAlertsCount' => 0,
+                    'adminTotalNotifications' => 0,
+                ]);
             }
         });
     }

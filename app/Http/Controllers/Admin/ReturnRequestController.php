@@ -31,15 +31,26 @@ class ReturnRequestController extends Controller
             $query->where('type', $type);
         }
 
-        $requests = $query->paginate(20)->withQueryString();
+        try {
+            $requests = $query->paginate(20)->withQueryString();
 
-        $stats = [
-            'total' => ReturnRequest::count(),
-            'pending' => ReturnRequest::where('status', 'bekliyor')->count(),
-            'processing' => ReturnRequest::where('status', 'inceleniyor')->count(),
-            'approved' => ReturnRequest::where('status', 'onaylandi')->count(),
-            'completed' => ReturnRequest::where('status', 'tamamlandi')->count(),
-        ];
+            $stats = [
+                'total' => ReturnRequest::count(),
+                'pending' => ReturnRequest::where('status', 'bekliyor')->count(),
+                'processing' => ReturnRequest::where('status', 'inceleniyor')->count(),
+                'approved' => ReturnRequest::where('status', 'onaylandi')->count(),
+                'completed' => ReturnRequest::where('status', 'tamamlandi')->count(),
+            ];
+        } catch (\Throwable $e) {
+            $requests = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+            $stats = [
+                'total' => 0,
+                'pending' => 0,
+                'processing' => 0,
+                'approved' => 0,
+                'completed' => 0,
+            ];
+        }
 
         return view('admin.returns.index', compact('requests', 'stats', 'status', 'type'));
     }

@@ -34,14 +34,24 @@ class ReviewController extends Controller
             });
         }
 
-        $reviews = $query->paginate(20)->withQueryString();
+        try {
+            $reviews = $query->paginate(20)->withQueryString();
 
-        $stats = [
-            'total' => ProductReview::count(),
-            'pending' => ProductReview::where('is_approved', false)->count(),
-            'approved' => ProductReview::where('is_approved', true)->count(),
-            'avg_rating' => (float) round(ProductReview::avg('rating') ?? 5.0, 1),
-        ];
+            $stats = [
+                'total' => ProductReview::count(),
+                'pending' => ProductReview::where('is_approved', false)->count(),
+                'approved' => ProductReview::where('is_approved', true)->count(),
+                'avg_rating' => (float) round(ProductReview::avg('rating') ?? 5.0, 1),
+            ];
+        } catch (\Throwable $e) {
+            $reviews = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+            $stats = [
+                'total' => 0,
+                'pending' => 0,
+                'approved' => 0,
+                'avg_rating' => 5.0,
+            ];
+        }
 
         return view('admin.reviews.index', compact('reviews', 'stats', 'status', 'search'));
     }

@@ -60,7 +60,14 @@ class StockController extends Controller
         $brands = Brand::orderBy('name')->get();
 
         // Pending stock notifications count
-        $pendingStockAlertsCount = StockNotification::where('is_notified', false)->count();
+        $pendingStockAlertsCount = 0;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('stock_notifications')) {
+                $pendingStockAlertsCount = StockNotification::where('is_notified', false)->count();
+            }
+        } catch (\Throwable $e) {
+            $pendingStockAlertsCount = 0;
+        }
 
         return view('admin.stocks.index', compact('products', 'sizes', 'categories', 'brands', 'pendingStockAlertsCount'));
     }

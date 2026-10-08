@@ -43,7 +43,11 @@ class StockMovementController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $movements = $query->paginate(25)->withQueryString();
+        try {
+            $movements = $query->paginate(25)->withQueryString();
+        } catch (\Throwable $e) {
+            $movements = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        }
 
         $products = Product::where('is_active', true)->orderBy('name')->get();
         $sizes = Size::orderBy('sort_order')->get();
