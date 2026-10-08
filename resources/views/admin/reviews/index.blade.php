@@ -56,7 +56,7 @@
                                     </div>
                                 </td>
                                 <td class="py-3.5 px-4">
-                                    <div class="font-medium text-gray-900">{{ $review->customer_name }}</div>
+                                    <div class="font-medium text-gray-900">{{ $review->author_name ?? $review->customer_name ?? 'Müşteri' }}</div>
                                     @if($review->is_verified_purchase)
                                         <span class="inline-flex items-center text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-semibold mt-0.5">
                                             <i class="fa-solid fa-circle-check mr-1"></i> Doğrulanmış Alışveriş

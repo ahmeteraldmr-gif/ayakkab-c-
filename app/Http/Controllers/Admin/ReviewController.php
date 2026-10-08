@@ -43,6 +43,12 @@ class ReviewController extends Controller
                 'approved' => ProductReview::where('is_approved', true)->count(),
                 'avg_rating' => (float) round(ProductReview::avg('rating') ?? 5.0, 1),
             ];
+            $counts = [
+                'total' => $stats['total'],
+                'pending' => $stats['pending'],
+                'approved' => $stats['approved'],
+            ];
+            return view('admin.reviews.index', compact('reviews', 'stats', 'counts', 'status', 'search'));
         } catch (\Throwable $e) {
             $reviews = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
             $stats = [
@@ -51,9 +57,13 @@ class ReviewController extends Controller
                 'approved' => 0,
                 'avg_rating' => 5.0,
             ];
+            $counts = [
+                'total' => 0,
+                'pending' => 0,
+                'approved' => 0,
+            ];
+            return view('admin.reviews.index', compact('reviews', 'stats', 'counts', 'status', 'search'));
         }
-
-        return view('admin.reviews.index', compact('reviews', 'stats', 'status', 'search'));
     }
 
     /**

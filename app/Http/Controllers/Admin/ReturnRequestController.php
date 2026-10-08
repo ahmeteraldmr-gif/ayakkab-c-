@@ -41,8 +41,27 @@ class ReturnRequestController extends Controller
                 'approved' => ReturnRequest::where('status', 'onaylandi')->count(),
                 'completed' => ReturnRequest::where('status', 'tamamlandi')->count(),
             ];
+
+            $returns = $requests;
+            $counts = [
+                'total' => $stats['total'],
+                'bekliyor' => $stats['pending'],
+                'inceleniyor' => $stats['processing'],
+                'onaylandi' => $stats['approved'],
+                'tamamlandi' => $stats['completed'],
+                'reddedildi' => 0,
+            ];
+
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('return_requests')) {
+                    $counts['reddedildi'] = ReturnRequest::where('status', 'reddedildi')->count();
+                }
+            } catch (\Throwable $e) {}
+
+            return view('admin.returns.index', compact('returns', 'requests', 'counts', 'stats', 'status', 'type'));
         } catch (\Throwable $e) {
             $requests = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+            $returns = $requests;
             $stats = [
                 'total' => 0,
                 'pending' => 0,
@@ -50,9 +69,16 @@ class ReturnRequestController extends Controller
                 'approved' => 0,
                 'completed' => 0,
             ];
+            $counts = [
+                'total' => 0,
+                'bekliyor' => 0,
+                'inceleniyor' => 0,
+                'onaylandi' => 0,
+                'tamamlandi' => 0,
+                'reddedildi' => 0,
+            ];
+            return view('admin.returns.index', compact('returns', 'requests', 'counts', 'stats', 'status', 'type'));
         }
-
-        return view('admin.returns.index', compact('requests', 'stats', 'status', 'type'));
     }
 
     /**
